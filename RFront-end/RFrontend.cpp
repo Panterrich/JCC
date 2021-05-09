@@ -333,6 +333,12 @@ void Print_op(struct Node* current_node, size_t* tab, FILE* file)
         return;
     }
 
+    if (current_node->type == FUNC && current_node->value == 12)
+    {
+        Print_print(current_node, tab, file);
+        return;
+    }
+
     if (current_node->type == FUNC && current_node->value == 11)
     {
         Print_scan(current_node, tab, file);

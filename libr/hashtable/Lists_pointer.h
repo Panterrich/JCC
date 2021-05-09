@@ -6,10 +6,8 @@
 #include <math.h>
 #include <assert.h>
 #include <limits.h>
-#include <../../Compiler/compiler.h>
 
 //=======================================================================================================================
-
 template <typename ElemT> 
 struct Type_traits 
 {};
@@ -40,13 +38,6 @@ template <> struct Type_traits <size_t>
     static size_t Poison() {return 0xBAADDEED;};
     static bool IsPoison(size_t value) {return value == Type_traits<size_t>::Poison();};
     static void Printf(FILE* file, size_t value) {fprintf(file, "%ld", value);};
-};
-
-template <> struct Type_traits <struct Variable>
-{
-    static struct Variable Poison() {struct Variable temp = {INT32_MAX, 0}; return temp;};
-    static bool IsPoison(struct Variable value) {return value.number == Type_traits<struct Variable>::Poison().number;};
-    static void Printf(FILE* file, struct Variable value) {fprintf(file, "%ld %d", value.number, value.initialization);};
 };
 
 #define LIST_POINTER(name, KeyT, DataT) List_pointer<KeyT, DataT> name(#name)

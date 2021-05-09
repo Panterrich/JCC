@@ -66,6 +66,8 @@ struct Node* GetOp(struct Tree* tree, struct Node* previous_node, struct Stack* 
 
 struct Node* GetPrint(struct Tree* tree, struct Node* previous_node, struct Stack* nodes, size_t* index_node, FILE* list);
 
+struct Node* GetPrintf(struct Tree* tree, struct Node* previous_node, struct Stack* nodes, size_t* index_node, FILE* list);
+
 struct Node* GetScan(struct Tree* tree, struct Node* previous_node, struct Stack* nodes, size_t* index_node, FILE* list);
 
 struct Node* GetIf(struct Tree* tree, struct Node* previous_node, struct Stack* nodes, size_t* index_node, FILE* list);

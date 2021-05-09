@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
 
     Tree_create(&tree, &text, name_program);
 
-    Tree_graph(&tree);
+    //Tree_graph(&tree);
     Tree_print(&tree);    
 
     Tree_destruct(&tree);

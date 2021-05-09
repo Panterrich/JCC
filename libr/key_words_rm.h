@@ -2,6 +2,7 @@ KEY_WORD("Kono, Giorno Giovanna, niwa yume ga aru", 39, "main",          FUNC,  
 KEY_WORD("Kira Kuin baitsa dasuto",                 23, "return",        OPERATION,  2, RETURN, "file '../sound/kira.ts'\n"          )
 KEY_WORD("Yare Yare Daze",                          14, ";",             LR,         3, LR,     "file '../sound/Yare_Yare_Daze.ts'\n")
 KEY_WORD("Arrivederci",                             11, "print",         FUNC,      10, PRINT,  "file '../sound/Arrivederci.ts'\n"   ) 
+KEY_WORD("Nigerundayo",                             11, "printf",        FUNC,      12, PRINTF, "file '../sound/nigerundayo.ts'\n"   ) 
 KEY_WORD("Kono",                                     4, "scan",          FUNC,      11, SCAN,   "file '../sound/Kono_Dio_da.ts'\n"   )
 KEY_WORD("Mousukoshite ora ora desuka",             27, "if",            OPERATION, 30, IF,     "file '../sound/Darby.ts'\n"         ) 
 KEY_WORD("Gorudo Ekusuperiensu Rekuiemu",           29, "while",         OPERATION, 31, WHILE,  "file '../sound/Requiem.ts'\n"       )  

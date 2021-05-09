@@ -27,7 +27,7 @@ const int MAX_SIZE_HASH_TABLE_FUNC   = 100;
 const int MAX_SIZE_HASH_TABLE_VARS   = 50;
 const int MAX_SIZE_HASH_TABLE_LABELS = 500;
 
-static const char BUFFER[0x1000] = {};
+static const char BUFFER[1 << 20] = {};
 
 //=============================================================================================================
 
@@ -50,9 +50,9 @@ struct Code
     size_t count_label;
 
     Hash_table<char*, size_t> func;
-    Hash_table<char*, Variable> global_var;
-    Hash_table<char*, Variable> locale_var;
-    Hash_table<char*, size_t> label;
+    Hash_table<char*, struct Variable> global_var;
+    Hash_table<char*, struct Variable> locale_var;
+    Hash_table<size_t, size_t> label;
     
     size_t rip;
 };
@@ -79,7 +79,7 @@ void Compile_pass(struct Tree* tree, struct Code* info, char* bytecode);
 
 void Initialization_global_vars(struct Tree* tree, struct Code* info, char* bytecode);
 
-void Begin_translation(struct Tree* tree, struct Code* info, char* bytecode);
+void Translation(struct Tree* tree, struct Code* info, char* bytecode);
 
 size_t Add_ELF_header(FILE* file);
 
@@ -115,6 +115,30 @@ int Is_key_word(char* str);
 
 //=====================================================================================================================
 
+void Print_dec(struct Tree* tree, struct Code* info, char* bytecode);
+
+void Print_func(struct Tree* tree, struct Node* current_node, struct Code* info, char* bytecode);
+
+void Print_body(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode);
+
+void Print_op(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode);
+
+void Print_print(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode);
+
+void Print_printf(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode);
+
+void Print_scan(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode);
+
+void Print_if(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode);
+
+void Print_while(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode);
+
+void Print_assign(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode);
+
+void Print_call(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode);
+
+void Print_ret(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode);
+
 void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode);
 
 void Print_arg(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode);
@@ -122,6 +146,10 @@ void Print_arg(struct Tree* tree, struct Node* current_node, struct Code* info, 
 void Print_call(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode);
 
 //=====================================================================================================================
+
 int Find_main(struct Tree* tree);
+
+void Find_locale_var(struct Tree* tree, struct Node* current_node, struct Code* info);
+
 
 #endif

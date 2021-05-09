@@ -382,6 +382,11 @@ struct Node* GetOp(struct Tree* tree, struct Node* previous_node, struct Stack* 
         return GetPrint(tree, nullptr, nodes, index_node, list);
     }
 
+    if (Get_node(nodes, *index_node)->type == FUNC && Get_node(nodes, *index_node)->value == 12)
+    {
+        return GetPrintf(tree, nullptr, nodes, index_node, list);
+    }
+
     if (Get_node(nodes, *index_node)->type == FUNC && Get_node(nodes, *index_node)->value == 11)
     {
         return GetScan(tree, nullptr, nodes, index_node, list);
@@ -434,7 +439,33 @@ struct Node* GetPrint(struct Tree* tree, struct Node* previous_node, struct Stac
 
     Node_fill(print,
               equation,
-              FUNC, print->str, 11, nullptr,
+              FUNC, print->str, 10, nullptr,
+              nullptr);
+
+    Require(tree, nodes, index_node, LR, 3);
+    fprintf(list, Get_path(KEY_LR));
+
+    return print;
+}
+
+struct Node* GetPrintf(struct Tree* tree, struct Node* previous_node, struct Stack* nodes, size_t* index_node, FILE* list)
+{
+    Tree_null_check(tree);
+    Stack_null_check(nodes);
+    assert(index_node != nullptr);
+    assert(list       != nullptr);
+
+    struct Node* print = Get_node(nodes, *index_node);
+    ++(tree->size);
+    ++(*index_node);
+
+    fprintf(list, Get_path(KEY_PRINT));
+
+    struct Node* equation = GetC(tree, nullptr, nodes, index_node, list);
+
+    Node_fill(print,
+              equation,
+              FUNC, print->str, 12, nullptr,
               nullptr);
 
     Require(tree, nodes, index_node, LR, 3);

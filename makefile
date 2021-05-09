@@ -1,64 +1,83 @@
-all: libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp libr/Differentiator/Differentiator.cpp libr/hashtable/Hash_func.cpp   \
-	 Front-end/Frontend.cpp Front-end/main.cpp RFront-end/RFrontend.cpp RFront-end/main.cpp Middle-end/Middleend.cpp Middle-end/main.cpp 						\
-	 Compiler/compiler.cpp Compiler/main.cpp
-	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp Front-end/Frontend.cpp Front-end/main.cpp -o fe-hg -D HG
-	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp Front-end/Frontend.cpp Front-end/main.cpp -o fe-rm
-	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp RFront-end/RFrontend.cpp RFront-end/main.cpp -o rfe-hg -D HG
-	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp RFront-end/RFrontend.cpp RFront-end/main.cpp -o rfe-rm
-	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp libr/Differentiator/Differentiator.cpp Middle-end/Middleend.cpp Middle-end/main.cpp -o me
-	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp Compiler/compiler.cpp Compiler/main.cpp libr/hashtable/Hash_func.cpp -msse4.2 -mavx2 -march=native -o compl
+THIS_FILE := $(lastword $(MAKEFILE_LIST))
 
-clean_all: 
-	rm -f "images/equation.aux"
-	rm -f "images/equation.log"
-	rm -f "images/equation.out"
-	rm -f "images/equation.pdf"
-	rm -f "images/equation.tex"
-	rm -f "images/end.log"
-	rm -f "images/end.tex.bak"
-	rm -f "images/equation.tex.bak"
-	rm -f "images/preambule_article.tex.bak"
-	rm -f "images/title.tex.bak"
-	rm -f "images/title.log"
-	rm -f "images/tree_graph.dot"
-	rm -f images/base_*
+.PHONY: all
+.PHONY: clean_tex
+.PHONY: clean_all_image
+
+all: 
+	@echo $@  # print target name
+	@$(MAKE) -f $(THIS_FILE) fe-rm
+	@$(MAKE) -f $(THIS_FILE) fe-hg
+	@$(MAKE) -f $(THIS_FILE) rfe-rm
+	@$(MAKE) -f $(THIS_FILE) rfe-hg
+	@$(MAKE) -f $(THIS_FILE) me
+	@$(MAKE) -f $(THIS_FILE) compiler
+
+run_hg:
+	./build/fe-hg $(NAME).txt
+	./build/me    $(NAME).me
+	./build/compl $(NAME).jcc
+	chmod +x $(NAME).elf
+
+run_rm:
+	./build/fe-rm $(NAME).txt
+	./build/me    $(NAME).me
+	./build/compl $(NAME).jcc
+	chmod +x $(NAME).elf
+
 clean:
-	rm -f "images/equation.aux"
-	rm -f "images/equation.log"
-	rm -f "images/equation.out"
-	rm -f "images/equation.tex"
-	rm -f "images/tree_graph.dot"
-	rm -f "images/end.log"
-	rm -f "images/end.tex.bak"
-	rm -f "images/equation.tex.bak"
-	rm -f "images/preambule_article.tex.bak"
-	rm -f "images/title.tex.bak"
-	rm -f "images/title.log"
+	rm -f $(NAME).me
+	rm -f $(NAME).jcc
+	rm -f $(NAME).elf
 
-lang_all: libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp libr/Differentiator/Differentiator.cpp 	  \
-	 Front-end/Frontend.cpp Front-end/main.cpp RFront-end/RFrontend.cpp RFront-end/main.cpp Middle-end/Middleend.cpp Middle-end/main.cpp  \
-	 Back-end/Backend.cpp Back-end/main.cpp
-	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp Front-end/Frontend.cpp Front-end/main.cpp -o fe-hg -D HG
-	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp Front-end/Frontend.cpp Front-end/main.cpp -o fe-rm
-	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp RFront-end/RFrontend.cpp RFront-end/main.cpp -o rfe-hg -D HG
-	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp RFront-end/RFrontend.cpp RFront-end/main.cpp -o rfe-rm
-	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp libr/Differentiator/Differentiator.cpp Middle-end/Middleend.cpp Middle-end/main.cpp -o me
-	
+clean_build:
+	rm -f build/fe-rm
+	rm -f build/fe-hg
+	rm -f build/rfe-rm
+	rm -f build/rfe-hg
+	rm -f build/me
+	rm -f build/compl
 
 fe-hg: libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp Front-end/Frontend.cpp Front-end/main.cpp 
-	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp Front-end/Frontend.cpp Front-end/main.cpp -o fe-hg -D HG
+	@echo $@  # print target name
+	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp Front-end/Frontend.cpp Front-end/main.cpp -o build/fe-hg -D HG
 
 fe-rm: libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp Front-end/Frontend.cpp Front-end/main.cpp
-	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp Front-end/Frontend.cpp Front-end/main.cpp -o fe-rm
+	@echo $@  # print target name
+	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp Front-end/Frontend.cpp Front-end/main.cpp -o build/fe-rm
 
 rfe-hg: libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp RFront-end/RFrontend.cpp RFront-end/main.cpp
-	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp RFront-end/RFrontend.cpp RFront-end/main.cpp -o rfe-hg -D HG
+	@echo $@  # print target name
+	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp RFront-end/RFrontend.cpp RFront-end/main.cpp -o build/rfe-hg -D HG
 
 rfe-rm: libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp RFront-end/RFrontend.cpp RFront-end/main.cpp
-	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp RFront-end/RFrontend.cpp RFront-end/main.cpp -o rfe-rm
+	@echo $@  # print target name
+	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp RFront-end/RFrontend.cpp RFront-end/main.cpp -o build/rfe-rm
 
-me: libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp libr/Differentiator/Differentiator.cpp Middle-end/Middleend.cpp Middle-end/main.cpp 
-	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp libr/Differentiator/Differentiator.cpp Middle-end/Middleend.cpp Middle-end/main.cpp -o me
+me: libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp libr/Differentiator/Differentiator.cpp Middle-end/Middleend.cpp Middle-end/main.cpp
+	@echo $@  # print target name
+	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp libr/Differentiator/Differentiator.cpp Middle-end/Middleend.cpp Middle-end/main.cpp -o build/me
 
-Compiler: Compiler/compiler.cpp Compiler/main.cpp libr/hashtable/Hash_func.cpp
-	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp Compiler/compiler.cpp Compiler/main.cpp libr/hashtable/Hash_func.cpp -msse4.2 -mavx2 -march=native -o compl
+compiler: Compiler/compiler.cpp Compiler/main.cpp libr/hashtable/Hash_func.cpp
+	@echo $@  # print target name
+	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp Compiler/compiler.cpp Compiler/main.cpp libr/hashtable/Hash_func.cpp -msse4.2 -mavx2 -march=native -o build/compl
+
+
+clean_all_image: 
+	@echo $@  # print target name
+	@$(MAKE) -f $(THIS_FILE) clean_tex
+	rm -f "images/tree_graph.dot"
+	rm -f images/base_*
+
+clean_tex:
+	rm -f "images/equation.aux"
+	rm -f "images/equation.log"
+	rm -f "images/equation.out"
+	rm -f "images/equation.tex"
+	rm -f "images/tree_graph.dot"
+	rm -f "images/end.log"
+	rm -f "images/end.tex.bak"
+	rm -f "images/equation.tex.bak"
+	rm -f "images/preambule_article.tex.bak"
+	rm -f "images/title.tex.bak"
+	rm -f "images/title.log"

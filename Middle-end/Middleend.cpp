@@ -214,7 +214,7 @@ void Tree_print(struct Tree* tree)
     TREE_ASSERT_OK(tree);
 
     char name_output[MAX_SIZE_COMMAND] = {};
-    sprintf(name_output, "files/%s.be", tree->name_equation);
+    sprintf(name_output, "files/%s.jcc", tree->name_equation);
 
     FILE* file = fopen(name_output, "w");
     

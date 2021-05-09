@@ -33,11 +33,11 @@ int main(int argc, char* argv[])
 
     Tree_create(&tree, &text, name_program);
     Free_memory(&text);
-    Tree_graph(&tree);
+    //Tree_graph(&tree);
 
     Tree_processing(&tree);
 
-    Tree_graph(&tree);
+    //Tree_graph(&tree);
     Tree_print(&tree);
 
     Tree_destruct(&tree);

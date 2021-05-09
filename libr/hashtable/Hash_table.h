@@ -22,6 +22,7 @@ class Hash_table
     private:
         List_pointer<KeyT, DataT>* keys_;
         size_t size_;
+        size_t count_;
         typename hash_func<KeyT>::func hash_;
     
     public:
@@ -37,7 +38,9 @@ class Hash_table
         void swap(Hash_table<KeyT, DataT>& that);
 
         size_t get_size();
+        size_t get_count();
 
+        void visitor();
         unsigned int hash(KeyT key);
         void set_func(typename hash_func<KeyT>::func hash);
         DataT get_value(KeyT key);
@@ -48,5 +51,7 @@ class Hash_table
 
 
 unsigned int hash_crc(char* key);
+unsigned int hash_crc32(size_t key);
+
 
 #endif

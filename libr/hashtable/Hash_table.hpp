@@ -6,6 +6,7 @@
 template <typename KeyT, typename DataT>
 Hash_table <KeyT, DataT> :: Hash_table(size_t size, typename hash_func<KeyT>::func hash) :
     size_(size),
+    count_(0),
     hash_(hash),
     keys_(nullptr)
 {
@@ -17,27 +18,31 @@ Hash_table <KeyT, DataT> :: ~Hash_table()
 {
     delete[] keys_;
 
-    size_ = 0;
-    hash_ = nullptr;
-    keys_ = nullptr;
+    size_  = 0;
+    count_ = 0;
+    hash_  = nullptr;
+    keys_  = nullptr;
 }
 
 template <typename KeyT, typename DataT>
 Hash_table <KeyT, DataT> :: Hash_table(const Hash_table<KeyT, DataT>& that) :
     keys_(that.keys_),
     hash_(that.hash_),
-    size_(that.size_)
+    size_(that.size_),
+    count_(that.count_)
 {
-    that.size_ = 0;
-    that.keys_ = nullptr;
-    that.hash_ = nullptr;
+    that.size_  = 0;
+    that.count_ = 0;
+    that.keys_  = nullptr;
+    that.hash_  = nullptr;
 }
 
 template <typename KeyT, typename DataT>
 Hash_table <KeyT, DataT> :: Hash_table(Hash_table<KeyT, DataT>&& that) :
     keys_(nullptr),
     hash_(nullptr),
-    size_(0)
+    size_(0),
+    count_(0)
 {
     swap(that);
 }
@@ -67,17 +72,20 @@ void Hash_table<KeyT, DataT> :: swap(Hash_table<KeyT, DataT>& that)
     {
         Hash_table<KeyT, DataT> temp;
 
-        temp.keys_ = keys_;
-        temp.size_ = size_;
-        temp.hash_ = hash_;
+        temp.keys_  = keys_;
+        temp.size_  = size_;
+        temp.count_ = count_;
+        temp.hash_  = hash_;
 
-        keys_ = that.keys_;
-        hash_ = that.hash_;
-        size_ = that.size_;
+        keys_  = that.keys_;
+        hash_  = that.hash_;
+        size_  = that.size_;
+        count_ = that.count_;
 
-        that.keys_ = temp.keys_;
-        that.hash_ = temp.hash_;
-        that.size_ = temp.size_;
+        that.keys_  = temp.keys_;
+        that.hash_  = temp.hash_;
+        that.size_  = temp.size_;
+        that.count_ = temp.count_;
     }
 }
 
@@ -85,6 +93,12 @@ template <typename KeyT, typename DataT>
 size_t Hash_table <KeyT, DataT> :: get_size()
 {
     return size_;
+}
+
+template <typename KeyT, typename DataT>
+size_t Hash_table <KeyT, DataT> :: get_count()
+{
+    return count_;
 }
 
 template <typename KeyT, typename DataT>
@@ -127,6 +141,8 @@ unsigned int Hash_table<KeyT, DataT> :: set_value(KeyT key, DataT data)
 
     keys_[hash_key % size_].insert_end(key, data);
 
+    ++count_;
+
     return hash_key;
 }
 
@@ -137,6 +153,8 @@ void Hash_table<KeyT, DataT> :: remove(KeyT key)
 
     size_t index = hash(key) % size_;
     keys_[index].delete_element(keys_[index].find_value(key));
+
+    --count_;
 }
     
 template <typename KeyT, typename DataT>
@@ -146,5 +164,15 @@ void Hash_table<KeyT, DataT> :: clear()
     {
         keys_[index].clear();
     }
+
+    count_ = 0;
 }
+
+template <typename KeyT, typename DataT>
+void Hash_table<KeyT, DataT> :: visitor()
+{
+
+}
+
+
 #endif

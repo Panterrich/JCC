@@ -2,6 +2,7 @@ KEY_WORD("この, Giorno Giovanno, にわ ゆめ が ある", 49, "main",       
 KEY_WORD("キラー・クイーン バイツァ・ダスト",           49, "return",      OPERATION,   2, RETURN, "file '../sound/kira.ts'\n"          )
 KEY_WORD("やれやれだぜ",                            18, ";",            LR,         3,  LR,     "file '../sound/Yare_Yare_Daze.ts'\n")
 KEY_WORD("アリーヴェデルチ",                         24, "print",        FUNC,      10,  PRINT,  "file '../sound/Arrivederci.ts'\n"   )
+KEY_WORD("逃げるんだよ",                            18, "printf",       FUNC,      12,  PRINTF, "file '../sound/nigerundayo.ts'\n"   )
 KEY_WORD("この",                                    6, "scan",         FUNC,      11, SCAN,   "file '../sound/Kono_Dio_da.ts'\n"   )
 KEY_WORD("もしかしてオラオラですかあ",                 39, "if",           OPERATION, 30, IF,     "file '../sound/Darby.ts'\n"         ) 
 KEY_WORD("むげん つくよみ",                          22, "while",        OPERATION, 31, WHILE,  "file '../sound/Requiem.ts'\n"       )

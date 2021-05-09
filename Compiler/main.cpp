@@ -33,12 +33,12 @@ int main(int argc, char* argv[])
 
     Tree_create(&tree, &text, name_program);
     Free_memory(&text);
-    Tree_graph(&tree);
+    // Tree_graph(&tree);
     
     char name_output[MAX_SIZE_COMMAND] = {};
     sprintf(name_output, "files/%s.elf", tree.name_equation);
 
-    FILE* elf = fopen("my_elf", "wb");
+    FILE* elf = fopen(name_output, "wb");
 
     Create_elf(&tree, elf);
 

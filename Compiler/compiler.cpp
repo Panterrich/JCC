@@ -1,11 +1,18 @@
 #include "compiler.h"
 
+template <> struct Type_traits <struct Variable>
+{
+    static struct Variable Poison() {struct Variable temp = {SIZE_MAX, 0}; return temp;};
+    static bool IsPoison(struct Variable value) {return value.number == Type_traits<struct Variable>::Poison().number;};
+    static void Printf(FILE* file, struct Variable value) {fprintf(file, "%ld %d", value.number, value.initialization);};
+};
+
 void Create_elf(struct Tree* tree, FILE* file)
 {
     struct Code info = {0, 0, 0, 0, 0, 0, 0, {MAX_SIZE_HASH_TABLE_FUNC,   hash_crc},     \
                                              {MAX_SIZE_HASH_TABLE_VARS,   hash_crc},     \
                                              {MAX_SIZE_HASH_TABLE_VARS,   hash_crc},     \
-                                             {MAX_SIZE_HASH_TABLE_LABELS, hash_crc}, 0};
+                                             {MAX_SIZE_HASH_TABLE_LABELS, hash_crc32}, 0};
 
     char* lib      = Include_lib(&info);
     char* bytecode = (char*) calloc(tree->size * MAX_SIZE_CMD, sizeof(char));
@@ -17,13 +24,23 @@ void Create_elf(struct Tree* tree, FILE* file)
     }
 
     Compile_pass(tree, &info, bytecode);
-    Compile_pass(tree, &info, bytecode);
+
+    info.size_data    += 1 << 20;
 
     info.size_headers += Add_ELF_header(file);
     info.size_headers += Add_program_header(file);
 
     Add_program_code_header(file, &info);
     Add_program_data_header(file, &info);
+    
+    info.count_label = 0;
+    info.rip         = 0;
+    info.size_code   = 0;
+    info.size_data   = 0;
+
+    Compile_pass(tree, &info, bytecode);
+
+    info.size_data    += 1 << 20;
 
     Write_content_elf(file, &info, lib, bytecode);
 }
@@ -32,7 +49,7 @@ char* Include_lib(struct Code* info)
 {
     assert(info);
 
-    FILE* lib = fopen("libr/IOlib1", "rb");
+    FILE* lib = fopen("libr/IOlib", "rb");
 
     size_t n_lines = 0;  // PLUG
     char* lib_buffer = Create_buffer(lib, &n_lines, &info->size_lib);
@@ -49,13 +66,13 @@ void Compile_pass(struct Tree* tree, struct Code* info, char* bytecode)
     assert(bytecode);
 
     BYTE3(0x49, 0xC7, 0xC6); // mov r14, data + var * 8;
-    NUMBER(info->offset_data * 0x1000 + 0x401000 + info->count_var << 3);
+    ADDRESS((info->offset_data * 0x1000 + 0x401000 + (info->global_var.get_count() << 3)));
 
     BYTE3(0x49, 0xC7, 0xC7); // mov r15, data
-    NUMBER(info->offset_data * 0x1000 + 0x401000);
+    ADDRESS(info->offset_data * 0x1000 + 0x401000);
 
     Initialization_global_vars(tree, info, bytecode);
-    Begin_translation(         tree, info, bytecode);
+    Translation(               tree, info, bytecode);
 }
 
 void Initialization_global_vars(struct Tree* tree, struct Code* info, char* bytecode)
@@ -77,7 +94,7 @@ void Initialization_global_vars(struct Tree* tree, struct Code* info, char* byte
 
                 if (Type_traits<struct Variable>::IsPoison(var))
                 {
-                    var.number         = info->global_var.get_size();
+                    var.number         = info->global_var.get_count();
                     var.initialization = 1;
 
                     info->global_var.set_value(new_var->str, var);
@@ -119,7 +136,7 @@ void Initialization_global_vars(struct Tree* tree, struct Code* info, char* byte
 
             if (Type_traits<struct Variable>::IsPoison(var))
             {
-                var.number         = info->global_var.get_size();
+                var.number         = info->global_var.get_count();
                 var.initialization = 1;
 
                 info->global_var.set_value(new_var->str, var);
@@ -148,18 +165,21 @@ void Initialization_global_vars(struct Tree* tree, struct Code* info, char* byte
     }
 }
 
-void Begin_translation(struct Tree* tree, struct Code* info, char* bytecode)
+void Translation(struct Tree* tree, struct Code* info, char* bytecode)
 {
     assert(tree);
     assert(info);
     assert(bytecode);
 
-    info->func.get_value("main");
+    size_t shift_main = info->func.get_value(const_cast<char*>("main"));
 
-    sprintf(bytecode, "push %lu\n"
-                  "pop rfx\n"
-                  "call :main\n"
-                  "hlt\n\n\n", ram->global_var->size);
+    BYTE1(0xE8); // call main
+    ADDRESS(shift_main - (info->rip + 4));
+
+    BYTE1(0xE8); // jmp hlt
+    ADDRESS(0x1C1 - (info->size_lib + info->rip + 4)); // 0x1C1 - begin func hlt
+
+    Print_dec(tree, info, bytecode);
 }
 
 size_t Add_ELF_header(FILE* file)
@@ -303,6 +323,437 @@ void Bytecode_alignment(FILE* file, int size)
 
 //=============================================================================================================
 
+void Print_dec(struct Tree* tree, struct Code* info, char* bytecode)
+{
+    Tree_null_check(tree);
+    assert(info);
+    assert(bytecode);
+
+    struct Node* current_node = tree->root;
+
+    while (current_node->type == DECLARATE)
+    {
+        if (current_node->left != nullptr)
+        {
+            if (current_node->left->type == FUNC) Print_func(tree, current_node->left, info, bytecode);
+        }
+
+        current_node = current_node->right;
+
+        if (current_node == nullptr) break;
+    }
+
+    if (current_node != nullptr)
+    {   
+        if (current_node->type == FUNC) Print_func(tree, current_node, info, bytecode);
+    }
+}
+
+void Print_func(struct Tree* tree, struct Node* current_node, struct Code* info, char* bytecode)
+{
+    Tree_null_check(tree);
+    assert(info);
+    assert(bytecode);
+
+    if (current_node == nullptr) return;
+
+    Find_locale_var(tree, current_node->left, info);
+    size_t count_param = info->locale_var.get_count();
+
+    info->locale_var.visitor();
+
+    Find_locale_var(tree, current_node->right, info);
+    size_t count_var = info->locale_var.get_count();
+
+    info->func.set_value(current_node->str, info->rip);
+
+    BYTE2(0x41, 0x5c); // pop  r12
+
+    for (size_t index = 0; index < count_param; ++index)
+    {
+        if (index == 0)
+        {
+            BYTE3(0x41, 0x8F, 0x06);  // pop [r14 + 0]
+        }
+
+        else if (index > 0 && index < 16)
+        {
+            BYTE4(0x41, 0x8F, 0x46, index << 3);
+        }
+
+        else
+        {
+            BYTE3(0x41, 0x8F, 0x86);
+            ADDRESS(index << 3);
+        }
+    }
+
+    Print_body(tree, current_node->right, info, count_var, bytecode);
+
+    BYTE2(0x41, 0x54); // push r12
+    BYTE1(0xC3); // ret
+
+    info->locale_var.clear();
+}
+
+void Print_body(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode)
+{
+    Tree_null_check(tree);
+    assert(info);
+    assert(bytecode);
+
+    if (current_node == nullptr) return;
+
+    if (current_node->type == LR) 
+    {
+        Print_op(tree, current_node->left, info, count_var, bytecode);
+        Print_body(tree, current_node->right, info, count_var, bytecode);
+    }
+}
+
+void Print_op(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode)
+{
+    Tree_null_check(tree);
+    assert(info);
+    assert(bytecode);
+
+    if (current_node == nullptr) return;
+
+    if (current_node->type == LR && current_node->value == 3)
+    {
+        return;
+    }
+
+    if (current_node->type == FUNC && current_node->value == 10)
+    {
+        Print_print(tree, current_node, info, count_var, bytecode);
+        return;
+    }
+
+    if (current_node->type == FUNC && current_node->value == 12)
+    {
+        Print_printf(tree, current_node, info, count_var, bytecode);
+        return;
+    }
+
+    if (current_node->type == FUNC && current_node->value == 11)
+    {
+        Print_scan(tree, current_node, info, count_var, bytecode);
+        return;
+    }
+
+    if (current_node->type == OPERATION && current_node->value == 30)
+    {   
+        Print_if(tree, current_node, info, count_var, bytecode);
+        return;
+    }
+
+    if (current_node->type == OPERATION && current_node->value == 31)
+    {
+        Print_while(tree, current_node, info, count_var, bytecode);
+        return;
+    }
+
+    if (current_node->type == OPERATION && current_node->value == 32)
+    {
+        Print_assign(tree, current_node, info, count_var, bytecode);
+        return;
+    }
+
+    if (current_node->type == FUNC)
+    {
+        Print_call(tree, current_node, info, count_var, bytecode);
+
+        BYTE4(0x48, 0x83, 0xC4, 0x08); // add rsp, 8
+                                       // remove returned value
+
+        return;
+    }
+    
+    Print_ret(tree, current_node, info, count_var, bytecode);
+    return;
+}
+
+void Print_print(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode)
+{
+    Tree_null_check(tree);
+    assert(info);
+    assert(bytecode);
+
+    if (current_node == nullptr) return;
+
+    Print_equation(tree, current_node->left, info, count_var, bytecode);
+
+    BYTE1(0xE8); // call print
+    ADDRESS(0x182 - (info->size_lib + info->rip + 4));    
+}
+
+void Print_printf(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode)
+{
+    Tree_null_check(tree);
+    assert(info);
+    assert(bytecode);
+
+    if (current_node == nullptr) return;
+
+    Print_equation(tree, current_node->left, info, count_var, bytecode);
+
+    BYTE1(0xE8); // call printf
+    ADDRESS(0xB4 - (info->size_lib + info->rip + 4));    
+}
+
+void Print_scan(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode)
+{
+    Tree_null_check(tree);
+    assert(info);
+    assert(bytecode);
+
+    if (current_node == nullptr) return;
+
+    struct Variable var = info->global_var.get_value(current_node->left->str);
+    
+    if (!Type_traits<struct Variable>::IsPoison(var))
+    {
+        BYTE1(0xE8); // call scan
+        ADDRESS(0x05 - (info->size_lib + info->rip + 4));
+
+        if (var.number == 0)
+        {
+            BYTE3(0x41, 0x8F, 0x07); 
+        }
+
+        else if (var.number > 0 && var.number < 16)
+        {
+            BYTE4(0x41, 0x8F, 0x47, var.number << 3);
+        }
+
+        else
+        {
+            BYTE3(0x41, 0x8F, 0x87);
+            ADDRESS(var.number << 3);
+        }
+    }
+
+    else
+    {
+        struct Variable loc_var = info->locale_var.get_value(current_node->left->str);
+
+        if (Type_traits<struct Variable>::IsPoison(loc_var))
+        {
+            tree->error = VAR_NOT_FOUND;
+            TREE_ASSERT_OK(tree);
+        }
+
+        info->locale_var.remove(current_node->left->str);
+        info->locale_var.set_value(current_node->left->str, {loc_var.number, 1});
+
+        BYTE1(0xE8); // call scan
+        ADDRESS(0x05 - (info->size_lib + info->rip + 4));
+
+        if (loc_var.number == 0)
+        {
+            BYTE3(0x41, 0x8F, 0x06);
+        }
+
+        else if (loc_var.number > 0 && loc_var.number < 16)
+        {
+            BYTE4(0x41, 0x8F, 0x46, loc_var.number << 3);
+        }
+
+        else
+        {
+            BYTE3(0x41, 0x8F, 0x86);
+            ADDRESS(loc_var.number << 3);
+        }
+    }
+}
+
+void Print_assign(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode)
+{
+    Tree_null_check(tree);
+    assert(info);
+    assert(bytecode);
+
+    struct Variable var = info->global_var.get_value(current_node->left->str);
+
+    if (!Type_traits<struct Variable>::IsPoison(var))
+    {
+        Print_equation(tree, current_node->right, info, count_var, bytecode);
+
+        if (var.number == 0)
+        {
+            BYTE3(0x41, 0x8F, 0x07);
+        }
+
+        else if (var.number > 0 && var.number < 16)
+        {
+            BYTE4(0x41, 0x8F, 0x47, var.number << 3);
+        }
+
+        else
+        {
+            BYTE3(0x41, 0x8F, 0x87);
+            ADDRESS(var.number << 3);
+        }
+    }
+
+    else 
+    {
+        struct Variable loc_var = info->locale_var.get_value(current_node->left->str);
+
+        if (Type_traits<struct Variable>::IsPoison(loc_var))
+        {
+            tree->error = VAR_NOT_FOUND;
+            TREE_ASSERT_OK(tree);
+        }
+
+        info->locale_var.remove(current_node->left->str);
+        info->locale_var.set_value(current_node->left->str, {loc_var.number, 1});
+
+        Print_equation(tree, current_node->right, info, count_var, bytecode);
+
+        if (loc_var.number == 0)
+        {
+            BYTE3(0x41, 0x8F, 0x06);
+        }
+
+        else if (loc_var.number > 0 && loc_var.number < 16)
+        {
+            BYTE4(0x41, 0x8F, 0x46, loc_var.number << 3);
+        }
+
+        else
+        {
+            BYTE3(0x41, 0x8F, 0x86);
+            ADDRESS(loc_var.number << 3);
+        }
+    }
+}
+
+void Print_arg(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode)
+{
+    Tree_null_check(tree);
+    assert(info);
+    assert(bytecode);
+
+    if (current_node == nullptr) return;
+
+    if (current_node->type == LR)
+    {
+        if (current_node->left != nullptr)  Print_arg(tree, current_node->left,  info, count_var, bytecode);
+        if (current_node->right != nullptr) Print_arg(tree, current_node->right, info, count_var, bytecode);
+    }
+
+    else
+    {  
+        Print_equation(tree, current_node, info, count_var, bytecode);
+    }
+}
+
+void Print_if(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode)
+{
+    Tree_null_check(tree);
+    assert(info);
+    assert(bytecode);
+
+    size_t locale = info->count_label++;
+
+    Print_equation(tree, current_node->left,  info, count_var, bytecode);
+
+    BYTE1(0x59);                    // pop rcx
+    BYTE4(0x48, 0x83, 0xF9, 0x00); // cmp rcx, 0
+    BYTE2(0x0F, 0x84);             // je :if_end
+    ADDRESS(info->label.get_value(locale) - (info->rip + 4));
+
+    if (current_node->right->type == LR) Print_body(tree, current_node->right, info, count_var, bytecode);
+    else                                   Print_op(tree, current_node->right, info, count_var, bytecode);
+    
+    info->label.set_value(locale, info->rip); // if_end:
+}
+
+void Print_while(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode)
+{
+    Tree_null_check(tree);
+    assert(info);
+    assert(bytecode);
+
+    size_t locale      = info->count_label;
+    info->count_label += 2;
+    
+    info->label.set_value(locale, info->rip); // While_begin:
+
+    Print_equation(tree, current_node->left, info, count_var, bytecode);
+
+    BYTE1(0x59);                   // pop rcx
+    BYTE4(0x48, 0x83, 0xF9, 0x00); // cmp rcx, 0
+    BYTE2(0x0F, 0x84);             // je :While_end
+    ADDRESS(info->label.get_value(locale + 1) - (info->rip + 4));
+
+    if (current_node->right->type == LR) Print_body(tree, current_node->right, info, count_var, bytecode);
+    else                                   Print_op(tree, current_node->right, info, count_var, bytecode);
+    
+    // jmp :While_begin
+    BYTE1(0xE9);
+    ADDRESS(info->label.get_value(locale) - (info->rip + 4));
+
+    info->label.set_value(locale + 1, info->rip); // :While_end
+}
+
+void Print_call(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode)
+{
+    Tree_null_check(tree);
+    assert(info);
+    assert(bytecode);
+
+    BYTE2(0x41, 0x54); // push r12
+
+    Print_arg(tree, current_node->left, info, count_var, bytecode);
+
+    if (count_var < 16)
+    {
+        BYTE4(0x49, 0x83, 0xC6, count_var << 3); // add r14, number
+    }
+
+    else
+    {
+        BYTE3(0x49, 0x81, 0xC6);
+        ADDRESS(count_var << 3);
+    }
+
+    size_t shift_func = info->func.get_value(current_node->str);
+
+    BYTE1(0xE8); // call :func
+    ADDRESS(shift_func - (info->rip + 4));
+
+    if (count_var < 16)
+    {
+        BYTE4(0x49, 0x83, 0xEE, count_var << 3); // sub r14, number
+    }
+
+    else
+    {
+        BYTE3(0x49, 0x81, 0xEE);
+        ADDRESS(count_var << 3);
+    }
+
+    BYTE2(0x41, 0x5b); // pop  r11
+    BYTE2(0x41, 0x5c); // pop  r12
+    BYTE2(0x41, 0x53); // push r11
+}
+
+void Print_ret(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode)
+{
+    Tree_null_check(tree);
+    assert(info);
+    assert(bytecode);
+
+    Print_equation(tree, current_node->left, info, count_var, bytecode);
+
+    BYTE2(0x41, 0x54); // push r12
+
+    BYTE1(0xC3); // ret
+}
+
 void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode)
 {
     Tree_null_check(tree);
@@ -315,8 +766,21 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
     {
         case NUMBER:
         {
-            BYTE3(0x49, 0xC7, 0xC5);
-            NUMBER(current_node->value);
+            unsigned long long int_value = *(unsigned long long*)&current_node->value;
+
+            if (int_value < 0x80000000)
+            {
+                BYTE3(0x49, 0xc7, 0xc5); // mov r13, number
+                ADDRESS(int_value);
+            }            
+
+            else
+            {
+                BYTE2(0x49, 0xBD);
+                NUMBER(current_node->value)
+            }
+
+            BYTE2(0x41, 0x55); // push r13
 
             break;
         }
@@ -329,52 +793,52 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
             {
                 if (var.number == 0)
                 {
-                    BYTE3(0x41, 0xFF, 0x37);
+                    BYTE3(0x41, 0xFF, 0x37); // push [r15]
                 }
 
                 else if (var.number > 0 && var.number < 16)
                 {
-                    BYTE4(0x41, 0xFF, 0x77, var.number << 3);
+                    BYTE4(0x41, 0xFF, 0x77, var.number << 3); // push [r15 + 8 * number] 
                 } 
 
                 else
                 {
-                    BYTE3(0x41, 0xFF, 0xB7);
+                    BYTE3(0x41, 0xFF, 0xB7); // push [r15 + 8 * number] 
                     ADDRESS(var.number << 3);
                 }
             }
 
             else 
             {
-                struct Variable var = info->locale_var.get_value(current_node->str);
+                struct Variable loc_var = info->locale_var.get_value(current_node->str);
 
-                if (!Type_traits<struct Variable>::IsPoison(var))
+                if (Type_traits<struct Variable>::IsPoison(loc_var))
                 {
                     tree->error = VAR_NOT_FOUND;
                     TREE_ASSERT_OK(tree);
                 }
 
-                if (var.initialization == 0)
+                if (loc_var.initialization == 0)
                 {
                     *(int*)0 = 0;
                     // tree->error = NO_INITIALIZATION_VAR;
                     // TREE_ASSERT_OK(tree);
                 }
 
-                if (var.number == 0)
+                if (loc_var.number == 0)
                 {
                     BYTE3(0x41, 0xFF, 0x36);
                 }
 
-                else if (var.number > 0 && var.number < 16)
+                else if (loc_var.number > 0 && loc_var.number < 16)
                 {
-                    BYTE4(0x41, 0xFF, 0x76, var.number << 3);
+                    BYTE4(0x41, 0xFF, 0x76, loc_var.number << 3);
                 } 
 
                 else
                 {
                     BYTE3(0x41, 0xFF, 0xB6);
-                    ADDRESS(var.number << 3);
+                    ADDRESS(loc_var.number << 3);
                 }
             }
             
@@ -400,11 +864,23 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                 }
                 case 42: // SUB
                 {
-                    BYTE5(0xF2, 0x0F, 0x10, 0x0C, 0x24);       // movsd xmm1, [rsp]
-                    BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08); // movsd xmm0, [rsp + 8]
-                    BYTE4(0xF2, 0x0F, 0x5C, 0xC1);             // subsd xmm0, xmm1
-                    BYTE4(0x48, 0x83, 0xC4, 0x08);             // add rsp, 8
-                    BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);       // movsd [rsp], xmm0
+                    if (current_node->left != nullptr)
+                    {
+                        BYTE5(0xF2, 0x0F, 0x10, 0x0C, 0x24);       // movsd xmm1, [rsp]
+                        BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08); // movsd xmm0, [rsp + 8]
+                        BYTE4(0xF2, 0x0F, 0x5C, 0xC1);             // subsd xmm0, xmm1
+                        BYTE4(0x48, 0x83, 0xC4, 0x08);             // add rsp, 8
+                        BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);       // movsd [rsp], xmm0
+                    }
+
+                    else
+                    {
+                        BYTE5(0xF2, 0x0F, 0x10, 0x0C, 0x24);       // movsd xmm1, [rsp]
+                        BYTE4(0x66, 0x0F, 0x57, 0xC0);             // xorpd xmm0, xmm0
+                        BYTE4(0xF2, 0x0F, 0x5C, 0xC1);             // subsd xmm0, xmm1
+                        BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);       // movsd [rsp], xmm0
+                    }
+                   
 
                     break;
                 }
@@ -580,7 +1056,7 @@ int Find_main(struct Tree* tree)
 
     struct Node* current_node = tree->root;
 
-    while (current_node->type == DECLARATE && current_node->right != nullptr)
+    do
     {
         if (current_node->left != nullptr)
         {
@@ -588,13 +1064,35 @@ int Find_main(struct Tree* tree)
             else current_node = current_node->right;
         }
         else current_node = current_node->right;
-    }
+    } while (current_node->type == DECLARATE && current_node->right != nullptr);
 
     if (current_node == nullptr) return 0;
 
     if (current_node->type == FUNC && current_node->value == 1) return 1;
     else return 0;
 }
+
+void Find_locale_var(struct Tree* tree, struct Node* current_node, struct Code* info)
+{
+    Tree_null_check(tree);
+    assert(info);
+
+    if (current_node == nullptr) return;
+    
+    if (current_node->type == VAR)
+    {
+        if (Type_traits<struct Variable>::IsPoison(info->global_var.get_value(current_node->str)) && \
+            Type_traits<struct Variable>::IsPoison(info->locale_var.get_value(current_node->str)))
+        {
+            struct Variable new_var = {info->locale_var.get_count(), 0};
+            info->locale_var.set_value(current_node->str, new_var);
+        }
+    }
+
+    if (current_node->left  != nullptr) Find_locale_var(tree, current_node->left,  info);
+    if (current_node->right != nullptr) Find_locale_var(tree, current_node->right, info);
+}
+
 
 //=============================================================================================================
 

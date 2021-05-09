@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
 
     Free_nodes(&nodes);
 
-    Tree_graph(&tree);
+    //Tree_graph(&tree);
     Tree_print(&tree);
     
     Tree_destruct(&tree);
