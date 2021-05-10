@@ -31,6 +31,21 @@ static const char BUFFER[1 << 20] = {};
 
 //=============================================================================================================
 
+struct Registers
+{
+    bool xmm0_save;
+    bool xmm1_save;
+
+    int xmm0_rsp;
+    int xmm1_rsp;
+
+    int xmm0_count;
+    int xmm1_count;
+
+    int xmm0_rip;
+    int xmm1_rip;
+};
+
 struct Variable
 {
     size_t number;
@@ -77,9 +92,9 @@ char* Include_lib(struct Code* info);
 
 void Compile_pass(struct Tree* tree, struct Code* info, char* bytecode);
 
-void Initialization_global_vars(struct Tree* tree, struct Code* info, char* bytecode);
+void Initialization_global_vars(struct Tree* tree, struct Code* info, char* bytecode, struct Registers* reg);
 
-void Translation(struct Tree* tree, struct Code* info, char* bytecode);
+void Translation(struct Tree* tree, struct Code* info, char* bytecode, struct Registers* reg);
 
 size_t Add_ELF_header(FILE* file);
 
@@ -115,35 +130,35 @@ int Is_key_word(char* str);
 
 //=====================================================================================================================
 
-void Print_dec(struct Tree* tree, struct Code* info, char* bytecode);
+void Print_dec(struct Tree* tree, struct Code* info, char* bytecode, struct Registers* reg);
 
-void Print_func(struct Tree* tree, struct Node* current_node, struct Code* info, char* bytecode);
+void Print_func(struct Tree* tree, struct Node* current_node, struct Code* info, char* bytecode, struct Registers* reg);
 
-void Print_body(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode);
+void Print_body(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode, struct Registers* reg);
 
-void Print_op(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode);
+void Print_op(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode, struct Registers* reg);
 
-void Print_print(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode);
+void Print_print(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode, struct Registers* reg);
 
-void Print_printf(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode);
+void Print_printf(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode, struct Registers* reg);
 
-void Print_scan(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode);
+void Print_scan(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode, struct Registers* reg);
 
-void Print_if(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode);
+void Print_if(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode, struct Registers* reg);
 
-void Print_while(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode);
+void Print_while(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode, struct Registers* reg);
 
-void Print_assign(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode);
+void Print_assign(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode, struct Registers* reg);
 
-void Print_call(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode);
+void Print_call(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode, struct Registers* reg);
 
-void Print_ret(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode);
+void Print_ret(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode, struct Registers* reg);
 
-void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode);
+void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode, struct Registers* reg);
 
-void Print_arg(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode);
+void Print_arg(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode, struct Registers* reg);
 
-void Print_call(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode);
+void Print_call(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode, struct Registers* reg);
 
 //=====================================================================================================================
 

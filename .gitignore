@@ -2,16 +2,13 @@ images/
 .vscode/
 sound/
 
-compl
-fe-hg
-fe-rm
-dis
-asm
-cpu
-be
-me 
-rfe-rm 
-rfe-hg
+build/compl
+build/fe-hg
+build/fe-rm
+build/me 
+build/rfe-rm
+build/rfe-hg
+build/JCC
 
 
 log.txt

@@ -63,7 +63,7 @@ me: libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str
 
 compiler: Compiler/compiler.cpp Compiler/main.cpp libr/hashtable/Hash_func.cpp
 	@echo $@  # print target name
-	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp Compiler/compiler.cpp Compiler/main.cpp libr/hashtable/Hash_func.cpp -msse4.2 -mavx2 -march=native -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio -o build/compl
+	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp Compiler/compiler.cpp Compiler/main.cpp libr/hashtable/Hash_func.cpp -msse4.2 -mavx2 -march=native -o build/compl
 
 
 clean_all_image: 
