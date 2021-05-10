@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
 
     Tree_create(&tree, &text, name_program);
     Free_memory(&text);
-    // Tree_graph(&tree);
+    //Tree_graph(&tree);
     
     char name_output[MAX_SIZE_COMMAND] = {};
     sprintf(name_output, "files/%s.elf", tree.name_equation);
@@ -44,6 +44,10 @@ int main(int argc, char* argv[])
 
     fclose(elf);
     Tree_destruct(&tree);
+
+    char command[MAX_SIZE_COMMAND] = {};
+    sprintf(command, "chmod +x %s", name_output);
+    system(command);
     
     return 0;
 }

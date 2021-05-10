@@ -13,17 +13,20 @@ all:
 	@$(MAKE) -f $(THIS_FILE) me
 	@$(MAKE) -f $(THIS_FILE) compiler
 
+JCC: libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp libr/Differentiator/Differentiator.cpp libr/hashtable/Hash_func.cpp JCC/frontend.cpp JCC/GUI.cpp JCC/middleend.cpp JCC/compiler.cpp JCC/main.cpp
+	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp JCC/frontend.cpp JCC/GUI.cpp JCC/middleend.cpp JCC/compiler.cpp JCC/main.cpp \
+	libr/Differentiator/Differentiator.cpp libr/hashtable/Hash_func.cpp -msse4.2 -mavx2 -march=native -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio -o build/JCC
+
+
 run_hg:
 	./build/fe-hg $(NAME).txt
 	./build/me    $(NAME).me
 	./build/compl $(NAME).jcc
-	chmod +x $(NAME).elf
 
 run_rm:
 	./build/fe-rm $(NAME).txt
 	./build/me    $(NAME).me
 	./build/compl $(NAME).jcc
-	chmod +x $(NAME).elf
 
 clean:
 	rm -f $(NAME).me
@@ -60,7 +63,7 @@ me: libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str
 
 compiler: Compiler/compiler.cpp Compiler/main.cpp libr/hashtable/Hash_func.cpp
 	@echo $@  # print target name
-	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp Compiler/compiler.cpp Compiler/main.cpp libr/hashtable/Hash_func.cpp -msse4.2 -mavx2 -march=native -o build/compl
+	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp Compiler/compiler.cpp Compiler/main.cpp libr/hashtable/Hash_func.cpp -msse4.2 -mavx2 -march=native -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio -o build/compl
 
 
 clean_all_image: 
