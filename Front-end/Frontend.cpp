@@ -87,35 +87,6 @@ void Tokenizer(struct Program* program, struct Stack* nodes)
     } 
 }
 
-size_t Skip_separator(char** string)
-{   
-    assert(string != nullptr);
-
-    size_t count = 0;
-
-    while (isspace((int)(unsigned char)**string) || **string == '\n')
-    {
-        ++(*string);
-        ++count;
-    }
-
-    return count; 
-}
-
-char* Get_name_file(const char* file)
-{
-    assert(file != nullptr);
-
-    const char* begin = file;
-    while ((strchr(begin, '/')) != nullptr) begin = strchr(begin, '/') + 1;
-    char* name_file   = strdup(begin);
-
-    char* pointer_format  = strchr(name_file, '.');
-    if   (pointer_format != nullptr) *pointer_format = '\0';
-
-    return name_file;
-}
-
 struct Node* Get_node(struct Stack* nodes, size_t index) 
 {
     return ((struct Node*)((nodes->data)[index]));
@@ -1034,56 +1005,6 @@ void Free_nodes(struct Stack* nodes)
     }
 
     Stack_destruct(nodes);
-}
-
-void Tree_print(struct Tree* tree)
-{
-    Tree_null_check(tree);
-    TREE_ASSERT_OK(tree);
-
-    char name_output[MAX_SIZE_COMMAND] = {};
-    sprintf(name_output, "files/%s.me", tree->name_equation);
-
-    FILE* file = fopen(name_output, "w");
-    
-    Node_print(tree->root, file);
-
-    fclose(file);
-
-    char command[MAX_SIZE_COMMAND] = {};
-    sprintf(command, "astyle --mode=cs --suffix=none --style=ansi %s", name_output);
-    system(command);
-}
-
-void Node_print(struct Node* current_node, FILE* file)
-{
-    assert(file != nullptr);
-
-    if (current_node == nullptr) 
-    {
-        fprintf(file, "{\nnil\n}\n");
-        return;
-    }
-
-    if (current_node->type == FUNC)
-    {    
-        fprintf(file, "{\n$%s\n", current_node->str);
-    }
-
-    else if (current_node->type == NUMBER)
-    {
-        fprintf(file, "{\n%lg\n", current_node->value);
-    }
-
-    else
-    {
-        fprintf(file, "{\n%s\n", current_node->str);
-    }
-
-    Node_print(current_node->left, file);
-    Node_print(current_node->right,  file);
-
-    fprintf(file, "}\n");
 }
 
 const char* Get_path(int code)

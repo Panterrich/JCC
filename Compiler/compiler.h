@@ -15,12 +15,11 @@
 #include "../libr/Tree/Tree.h"
 #include "../libr/Stack/Guard.h"
 #include "../libr/hashtable/Hash_table.hpp"
+#include "../libr/LibEnd.h"
 
 #include "DSL.h"
 
 //=============================================================================================================
-
-const int MAX_SIZE_COMMAND           = 400;
 
 const int MAX_SIZE_CMD               = 40;
 const int MAX_SIZE_HASH_TABLE_FUNC   = 100;
@@ -44,6 +43,8 @@ struct Registers
 
     int xmm0_rip;
     int xmm1_rip;
+
+    bool flag;
 };
 
 struct Variable
@@ -72,18 +73,6 @@ struct Code
     size_t rip;
 };
 
-enum KEY_WORDS
-{
-    #define KEY_WORD(replace, len, word, type, value, number, path) KEY##_##number = value,
-
-    #ifdef HG
-        #include "../libr/key_words_hg.h"
-    #else 
-        #include "../libr/key_words_rm.h"
-    #endif
-    #undef KEY_WORD
-};
-
 //=============================================================================================================
 
 void Create_elf(struct Tree* tree, FILE* file);
@@ -107,26 +96,6 @@ void Add_program_data_header(FILE* file, struct Code* info);
 void Write_content_elf(FILE* file, struct Code* info, char* lib, char* bytecode);
 
 void Bytecode_alignment(FILE* file, int size);
-
-//=====================================================================================================================
-
-void Tree_create(struct Tree* tree, struct Text* text, const char* name_program);
-
-struct Node* Node_create(struct Tree* tree, struct Node* previous_node, struct Text* text, size_t* number_line);
-
-char* Get_name_file(const char* file);
-
-char* Get_word(char* begin);
-
-size_t Skip_separator(char** string);
-
-char* Name_key_word(char* str);
-
-int Type_key_word(char* str);
-
-double Code_key_word(char* str);
-
-int Is_key_word(char* str);
 
 //=====================================================================================================================
 

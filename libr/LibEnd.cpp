@@ -1,4 +1,4 @@
-#include "compiler.h"
+#include "LibEnd.h"
 
 void Tree_create(struct Tree* tree, struct Text* text, const char* name_program)
 {
@@ -179,177 +179,84 @@ int Is_key_word(char* str)
     return 0;
 }
 
-struct Node* Tree_search_node(struct Tree* tree, struct Node* current_node, int type, int number)
+
+char* Get_name_file(const char* file)
 {
-    Tree_null_check(tree);
-    
-    if (current_node == nullptr) return nullptr;
+    assert(file != nullptr);
 
-    struct Node* left  = Tree_search_node(tree, current_node->left, type, number);
-    struct Node* right = Tree_search_node(tree, current_node->right, type, number);
+    const char* begin = file;
+    while ((strchr(begin, '/')) != nullptr) begin = strchr(begin, '/') + 1;
+    char* name_file   = strdup(begin);
 
-    if (left == nullptr && right == nullptr)
-    {
-        if (current_node->type == type && current_node->value == number)
-        {
-            return current_node;
-        }
+    char* pointer_format  = strchr(name_file, '.');
+    if   (pointer_format != nullptr) *pointer_format = '\0';
 
-        else
-        {
-            return nullptr;
-        }
-    }
-
-    if (left  != nullptr) return left;
-    if (right != nullptr) return right;
-
-    return nullptr;
+    return name_file;
 }
 
-void Tree_processing(struct Tree* tree)
-{
-    Tree_null_check(tree);
 
-    struct Node* current_node = nullptr;
+size_t Skip_separator(char** string)
+{   
+    assert(string != nullptr);
 
-    while ((current_node = Tree_search_node(tree, tree->root, OPERATION, 52)) != nullptr)
-    {   
-        current_node->right = Derivative(tree, current_node->right, current_node->left->str, Hash(current_node->left->str));
-        Re_linking_subtree(tree, current_node, current_node->right, current_node->left);
+    size_t count = 0;
+
+    while (isspace((int)(unsigned char)**string) || **string == '\n')
+    {
+        ++(*string);
+        ++count;
     }
-     
-    Optimization(tree);
 
-    #ifdef ALLDIF
-    My_derivative(tree, tree->root);
-    Optimization(tree);
-    #endif
+    return count; 
 }
 
-struct Node* My_derivative(struct Tree* tree, struct Node* current_node)
+
+void Tree_print(struct Tree* tree)
 {
     Tree_null_check(tree);
+    TREE_ASSERT_OK(tree);
+
+    char name_output[MAX_SIZE_COMMAND] = {};
+    sprintf(name_output, "files/%s.me", tree->name_equation);
+
+    FILE* file = fopen(name_output, "w");
     
-    if (current_node == nullptr) return nullptr;
-   
-    #include "My_derivative_DSL.h"
+    Node_print(tree->root, file);
 
-    switch (TYPE)
+    fclose(file);
+
+    char command[MAX_SIZE_COMMAND] = {};
+    sprintf(command, "astyle --mode=cs --suffix=none --style=ansi %s", name_output);
+    system(command);
+}
+
+void Node_print(struct Node* current_node, FILE* file)
+{
+    assert(file != nullptr);
+
+    if (current_node == nullptr) 
     {
-        case DECLARATE:
-        {
-            My_derivative(tree, current_node->left);
-            My_derivative(tree, current_node->right);
-            break;
-        }
-
-        case LR: 
-        {
-            LNODE = dL;
-            RNODE = dR;
-
-            break;
-        }
-
-        case NUMBER: current_node->value = 0; break;
-        case VAR: 
-        {
-            free(current_node->str);
-
-            current_node->type = NUMBER;
-            current_node->str = nullptr;
-            current_node->value = 1;
-
-            break;
-        }
-
-        case OPERATION: 
-        {
-            if (current_node->value == KEY_ASSIGN)
-            {
-                if (current_node->prev != nullptr)
-                {
-                    if (current_node->prev->type == DECLARATE)
-                    {
-                        break;
-                    }
-                }
-            }
-
-            switch (OP)
-            {
-                case KEY_RETURN:
-                    My_derivative(tree, current_node->left);
-                    break;
-
-                case KEY_ASSIGN:
-                    My_derivative(tree, current_node->right);
-                    break;
-
-                case KEY_IF:
-                case KEY_WHILE:
-                    My_derivative(tree, current_node->left);
-                    My_derivative(tree, current_node->right);
-                    break;
-
-                #define DEF_OP(operator, op, number, code) case op: code; break;
-                #define DEF_FUNC(func, FUNC, hash, number, code)
-                
-                #include "../libr/Differentiator/commands.h"
-
-                #undef DEF_OP
-                #undef DEF_FUNC
-
-                default:
-                    tree->error = OPERATOR_SYNTAX_ERROR;
-                    TREE_ASSERT_OK(tree);
-                    break;
-            }
-            
-            break;
-        }
-        
-        case FUNC:
-        {
-            if (current_node->prev != nullptr)
-            {
-                if (current_node->prev->type == DECLARATE)
-                {
-                    My_derivative(tree, current_node->right);
-                
-                    break;
-                } 
-            }
-
-            switch (OP)
-            {
-                case KEY_PRINT: My_derivative(tree, current_node->left); break;
-                case KEY_SCAN: break;
-
-                #define DEF_OP(operator, OP, number, code)
-                #define DEF_FUNC(func, value, hash, number, code) case value: code; break;
-                
-                #include "../libr/Differentiator/commands.h"
-
-                #undef DEF_OP
-                #undef DEF_FUNC
-
-                default:
-                    My_derivative(tree, current_node->left);
-                    break;
-            }
-
-            break;        
-        }
-
-        default:
-            tree->error = TYPE_SYNTAX_ERROR;
-            TREE_ASSERT_OK(tree);
-            break;
+        fprintf(file, "{\nnil\n}\n");
+        return;
     }
 
-    tree->size = Size_subtree(tree, tree->root);
-    
-    return current_node;
+    if (current_node->type == FUNC)
+    {    
+        fprintf(file, "{\n$%s\n", current_node->str);
+    }
+
+    else if (current_node->type == NUMBER)
+    {
+        fprintf(file, "{\n%lg\n", current_node->value);
+    }
+
+    else
+    {
+        fprintf(file, "{\n%s\n", current_node->str);
+    }
+
+    Node_print(current_node->left, file);
+    Node_print(current_node->right,  file);
+
+    fprintf(file, "}\n");
 }

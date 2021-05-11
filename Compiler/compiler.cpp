@@ -106,34 +106,20 @@ void Initialization_global_vars(struct Tree* tree, struct Code* info, char* byte
                 }
 
                 Print_equation(tree, current_node->left->right, info, 0, bytecode, reg);
+                CLEAR_XMM0();
 
                 if (var.number == 0) // pop [r15 + (number << 3)]
                 {
-                    CLEAR_XMM0();
-                    CLEAR_XMM1();
-                    XMM0_RSP(8);
-                    XMM1_RSP(8);
-
                     BYTE3(0x41, 0x8F, 0x07); 
                 }
 
                 else if (var.number > 0 && var.number < 16) 
                 {
-                    CLEAR_XMM0();
-                    CLEAR_XMM1();
-                    XMM0_RSP(8);
-                    XMM1_RSP(8);
-
                     BYTE4(0x41, 0x8f, 0x47, var.number << 3);
                 }
 
                 else
                 {
-                    CLEAR_XMM0();
-                    CLEAR_XMM1();
-                    XMM0_RSP(8);
-                    XMM1_RSP(8);
-
                     BYTE3(0x41, 0x8F, 0x87);
                     ADDRESS(var.number << 3);
                 }
@@ -163,34 +149,20 @@ void Initialization_global_vars(struct Tree* tree, struct Code* info, char* byte
             }
 
             Print_equation(tree, current_node->right, info, 0, bytecode, reg);
+            CLEAR_XMM0();
 
             if (var.number == 0) // pop [r15 + (number << 3)]
             {
-                CLEAR_XMM0();
-                CLEAR_XMM1();
-                XMM0_RSP(8);
-                XMM1_RSP(8);
-
                 BYTE3(0x41, 0x8F, 0x07);
             }
 
             else if (var.number > 0 && var.number < 16) 
             {
-                CLEAR_XMM0();
-                CLEAR_XMM1();
-                XMM0_RSP(8);
-                XMM1_RSP(8);
-
                 BYTE4(0x41, 0x8f, 0x47, var.number << 3);
             }
 
             else
             {
-                CLEAR_XMM0();
-                CLEAR_XMM1();
-                XMM0_RSP(8);
-                XMM1_RSP(8);
-
                 BYTE3(0x41, 0x8F, 0x87);
                 ADDRESS(var.number << 3);
             }
@@ -209,9 +181,6 @@ void Translation(struct Tree* tree, struct Code* info, char* bytecode, struct Re
 
     BYTE1(0xE8); // call main
     ADDRESS(shift_main - (info->rip + 4));
-
-    XMM0_RSP(8);
-    XMM1_RSP(8);
 
     BYTE1(0xE8); // jmp hlt
     ADDRESS(0x1C1 - (info->size_lib + info->rip + 4)); // 0x1C1 - begin func hlt
@@ -412,31 +381,16 @@ void Print_func(struct Tree* tree, struct Node* current_node, struct Code* info,
     {
         if (index == 0)
         {
-            CLEAR_XMM0();
-            CLEAR_XMM1();
-            XMM0_RSP(8);
-            XMM1_RSP(8);
-
             BYTE3(0x41, 0x8F, 0x06);  // pop [r14 + 0]
         }
 
         else if (index > 0 && index < 16)
         {
-            CLEAR_XMM0();
-            CLEAR_XMM1();
-            XMM0_RSP(8);
-            XMM1_RSP(8);
-
             BYTE4(0x41, 0x8F, 0x46, index << 3);
         }
 
         else
         {
-            CLEAR_XMM0();
-            CLEAR_XMM1();
-            XMM0_RSP(8);
-            XMM1_RSP(8);
-
             BYTE3(0x41, 0x8F, 0x86);
             ADDRESS(index << 3);
         }
@@ -522,12 +476,6 @@ void Print_op(struct Tree* tree, struct Node* current_node, struct Code* info, s
 
         BYTE4(0x48, 0x83, 0xC4, 0x08); // add rsp, 8
                                        // remove returned value
-
-        CLEAR_XMM0();
-        CLEAR_XMM1();
-        XMM0_RSP(8);
-        XMM1_RSP(8);
-
         return;
     }
     
@@ -545,15 +493,12 @@ void Print_print(struct Tree* tree, struct Node* current_node, struct Code* info
     if (current_node == nullptr) return;
 
     Print_equation(tree, current_node->left, info, count_var, bytecode, reg);
+    CLEAR_XMM0();
 
     BYTE1(0xE8); // call print
     ADDRESS(0x182 - (info->size_lib + info->rip + 4));  
 
     BYTE4(0x48, 0x83, 0xC4, 0x08); // add rsp, 8
-    CLEAR_XMM0();
-    CLEAR_XMM1();
-    XMM0_RSP(8);
-    XMM1_RSP(8);
 }
 
 void Print_printf(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode, struct Registers* reg)
@@ -566,16 +511,12 @@ void Print_printf(struct Tree* tree, struct Node* current_node, struct Code* inf
     if (current_node == nullptr) return;
 
     Print_equation(tree, current_node->left, info, count_var, bytecode, reg);
+    CLEAR_XMM0();
 
     BYTE1(0xE8); // call printf
     ADDRESS(0xB4 - (info->size_lib + info->rip + 4));   
 
     BYTE4(0x48, 0x83, 0xC4, 0x08); // add rsp, 8
-
-    CLEAR_XMM0();
-    CLEAR_XMM1();
-    XMM0_RSP(8);
-    XMM1_RSP(8);
 }
 
 void Print_scan(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode, struct Registers* reg)
@@ -656,36 +597,22 @@ void Print_assign(struct Tree* tree, struct Node* current_node, struct Code* inf
     if (!Type_traits<struct Variable>::IsPoison(var))
     {
         Print_equation(tree, current_node->right, info, count_var, bytecode, reg);
+        CLEAR_XMM0();
 
         if (var.number == 0)
         {
             BYTE3(0x41, 0x8F, 0x07);
-
-            CLEAR_XMM0();
-            CLEAR_XMM1();
-            XMM0_RSP(8);
-            XMM1_RSP(8);
         }
 
         else if (var.number > 0 && var.number < 16)
         {
             BYTE4(0x41, 0x8F, 0x47, var.number << 3);
-
-            CLEAR_XMM0();
-            CLEAR_XMM1();
-            XMM0_RSP(8);
-            XMM1_RSP(8);
         }
 
         else
         {
             BYTE3(0x41, 0x8F, 0x87);
             ADDRESS(var.number << 3);
-
-            CLEAR_XMM0();
-            CLEAR_XMM1();
-            XMM0_RSP(8);
-            XMM1_RSP(8);
         }
     }
 
@@ -703,36 +630,22 @@ void Print_assign(struct Tree* tree, struct Node* current_node, struct Code* inf
         info->locale_var.set_value(current_node->left->str, {loc_var.number, 1});
 
         Print_equation(tree, current_node->right, info, count_var, bytecode, reg);
+        CLEAR_XMM0();
 
         if (loc_var.number == 0)
         {
             BYTE3(0x41, 0x8F, 0x06);
-
-            CLEAR_XMM0();
-            CLEAR_XMM1();
-            XMM0_RSP(8);
-            XMM1_RSP(8);
         }
 
         else if (loc_var.number > 0 && loc_var.number < 16)
         {
             BYTE4(0x41, 0x8F, 0x46, loc_var.number << 3);
-
-            CLEAR_XMM0();
-            CLEAR_XMM1();
-            XMM0_RSP(8);
-            XMM1_RSP(8);
         }
 
         else
         {
             BYTE3(0x41, 0x8F, 0x86);
             ADDRESS(loc_var.number << 3);
-
-            CLEAR_XMM0();
-            CLEAR_XMM1();
-            XMM0_RSP(8);
-            XMM1_RSP(8);
         }
     }
 }
@@ -768,11 +681,8 @@ void Print_if(struct Tree* tree, struct Node* current_node, struct Code* info, s
     size_t locale = info->count_label++;
 
     Print_equation(tree, current_node->left,  info, count_var, bytecode, reg);
-
     CLEAR_XMM0();
-    CLEAR_XMM1();
-    XMM0_RSP(8);
-    XMM1_RSP(8);
+    
 
     BYTE1(0x59);                    // pop rcx
     BYTE4(0x48, 0x83, 0xF9, 0x00); // cmp rcx, 0
@@ -798,11 +708,7 @@ void Print_while(struct Tree* tree, struct Node* current_node, struct Code* info
     info->label.set_value(locale, info->rip); // While_begin:
 
     Print_equation(tree, current_node->left, info, count_var, bytecode, reg);
-
     CLEAR_XMM0();
-    CLEAR_XMM1();
-    XMM0_RSP(8);
-    XMM1_RSP(8);
 
     BYTE1(0x59);                   // pop rcx
     BYTE4(0x48, 0x83, 0xF9, 0x00); // cmp rcx, 0
@@ -860,9 +766,6 @@ void Print_call(struct Tree* tree, struct Node* current_node, struct Code* info,
     BYTE2(0x41, 0x5b); // pop  r11
     BYTE2(0x41, 0x5c); // pop  r12
     BYTE2(0x41, 0x53); // push r11
-
-    CLEAR_XMM0();
-    CLEAR_XMM1();
 }
 
 void Print_ret(struct Tree* tree, struct Node* current_node, struct Code* info, size_t count_var, char* bytecode, struct Registers* reg)
@@ -873,6 +776,7 @@ void Print_ret(struct Tree* tree, struct Node* current_node, struct Code* info, 
     assert(reg);
 
     Print_equation(tree, current_node->left, info, count_var, bytecode, reg);
+    CLEAR_XMM0();
 
     BYTE2(0x41, 0x54); // push r12
 
@@ -907,9 +811,7 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
             }
 
             BYTE2(0x41, 0x55); // push r13
-     
             XMM0_RSP(-8);
-            XMM1_RSP(-8);
 
             break;
         }
@@ -923,9 +825,7 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                 if (var.number == 0)
                 {
                     BYTE3(0x41, 0xFF, 0x37); // push [r15]
-
                     XMM0_RSP(-8);
-                    XMM1_RSP(-8);
                 }
 
                 else if (var.number > 0 && var.number < 16)
@@ -933,7 +833,6 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                     BYTE4(0x41, 0xFF, 0x77, var.number << 3); // push [r15 + 8 * number] 
 
                     XMM0_RSP(-8);
-                    XMM1_RSP(-8);
                 } 
 
                 else
@@ -942,7 +841,6 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                     ADDRESS(var.number << 3);
 
                     XMM0_RSP(-8);
-                    XMM1_RSP(-8);
                 }
             }
 
@@ -968,7 +866,6 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                     BYTE3(0x41, 0xFF, 0x36);
 
                     XMM0_RSP(-8);
-                    XMM1_RSP(-8);
                 }
 
                 else if (loc_var.number > 0 && loc_var.number < 16)
@@ -976,7 +873,6 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                     BYTE4(0x41, 0xFF, 0x76, loc_var.number << 3);
 
                     XMM0_RSP(-8);
-                    XMM1_RSP(-8);
                 } 
 
                 else
@@ -985,7 +881,6 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                     ADDRESS(loc_var.number << 3);
 
                     XMM0_RSP(-8);
-                    XMM1_RSP(-8);
                 }
             }
             
@@ -1007,9 +902,9 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                     IF_XMM0(BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08)); // movsd xmm0, [rsp + 8]
 
                     BYTE4(0xF2, 0x0F, 0x58, 0xC1);                      // addsd xmm0, xmm1
-                    BYTE4(0x48, 0x83, 0xC4, 0x08);                      // add rsp, 8
+                    FLAG(BYTE4(0x48, 0x83, 0xC4, 0x08));                // add rsp, 8
 
-                    SAVE_XMM0(5);
+                    SAVE_XMM0();
                     BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);                // movsd [rsp], xmm0
 
                     break;
@@ -1023,9 +918,9 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                         XMM0_RSP(8);
                         IF_XMM0(BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08)); // movsd xmm0, [rsp + 8]
                         BYTE4(0xF2, 0x0F, 0x5C, 0xC1);                      // subsd xmm0, xmm1
-                        BYTE4(0x48, 0x83, 0xC4, 0x08);                      // add rsp, 8
+                        FLAG(BYTE4(0x48, 0x83, 0xC4, 0x08));                // add rsp, 8
 
-                        SAVE_XMM0(5);
+                        SAVE_XMM0();
                         BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);                // movsd [rsp], xmm0
                     }
 
@@ -1035,7 +930,7 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                         BYTE4(0x66, 0x0F, 0x57, 0xC0);             // xorpd xmm0, xmm0
                         BYTE4(0xF2, 0x0F, 0x5C, 0xC1);             // subsd xmm0, xmm1
 
-                        SAVE_XMM0(5);
+                        //SAVE_XMM0(5);
                         BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);       // movsd [rsp], xmm0
                     }
                    
@@ -1049,9 +944,9 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                     XMM0_RSP(8);
                     IF_XMM0(BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08)); // movsd xmm0, [rsp + 8]
                     BYTE4(0xF2, 0x0F, 0x59, 0xC1);                      // mulsd xmm0, xmm1
-                    BYTE4(0x48, 0x83, 0xC4, 0x08);                      // add rsp, 8
+                    FLAG(BYTE4(0x48, 0x83, 0xC4, 0x08));                      // add rsp, 8
 
-                    SAVE_XMM0(5);
+                    SAVE_XMM0();
                     BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);                // movsd [rsp], xmm0
 
                     break;
@@ -1063,9 +958,9 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                     XMM0_RSP(8);
                     IF_XMM0(BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08)); // movsd xmm0, [rsp + 8]
                     BYTE4(0xF2, 0x0F, 0x5E, 0xC1);                      // divsd xmm0, xmm1
-                    BYTE4(0x48, 0x83, 0xC4, 0x08);                      // add rsp, 8
+                    FLAG(BYTE4(0x48, 0x83, 0xC4, 0x08));                      // add rsp, 8
 
-                    SAVE_XMM0(5);
+                    SAVE_XMM0();
                     BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);                // movsd [rsp], xmm0
 
                     break;
@@ -1081,13 +976,13 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                     XMM0_RSP(8);
                     IF_XMM0(BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08)); // movsd xmm0, [rsp + 8]
                     BYTE5(0xF2, 0x0F, 0xC2, 0xC1, 0x06);       // cmpsd xmm0, xmm1, 6 (xmm0 > xmm1) 
-                    BYTE4(0x48, 0x83, 0xC4, 0x08);             // add rsp, 8
+                    FLAG(BYTE4(0x48, 0x83, 0xC4, 0x08));             // add rsp, 8
                     BYTE3(0x49, 0xC7, 0xC5);                   // mov r13, 1
                     ADDRESS(0x1);
                     BYTE5(0xF2, 0x49, 0x0F, 0x2A, 0xCD);       // cvtsi2sd xmm1, r13
                     BYTE4(0x66, 0x0F, 0x54, 0xC1);             // andpd xmm0, xmm1
 
-                    SAVE_XMM0(5);
+                    SAVE_XMM0();
                     BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);       // movsd [rsp], xmm0
 
                     break;
@@ -1099,13 +994,13 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                     XMM0_RSP(8);
                     IF_XMM0(BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08)); // movsd xmm0, [rsp + 8]
                     BYTE5(0xF2, 0x0F, 0xC2, 0xC1, 0x01);       // cmpsd xmm0, xmm1, 1 (xmm0 < xmm1) 
-                    BYTE4(0x48, 0x83, 0xC4, 0x08);             // add rsp, 8
+                    FLAG(BYTE4(0x48, 0x83, 0xC4, 0x08));             // add rsp, 8
                     BYTE3(0x49, 0xC7, 0xC5);                   // mov r13, 1
                     ADDRESS(0x1);
                     BYTE5(0xF2, 0x49, 0x0F, 0x2A, 0xCD);       // cvtsi2sd xmm1, r13
                     BYTE4(0x66, 0x0F, 0x54, 0xC1);             // andpd xmm0, xmm1
 
-                    SAVE_XMM0(5);
+                    SAVE_XMM0();
                     BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);       // movsd [rsp], xmm0
 
                     break;
@@ -1117,13 +1012,13 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                     XMM0_RSP(8);
                     IF_XMM0(BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08)); // movsd xmm0, [rsp + 8]
                     BYTE5(0xF2, 0x0F, 0xC2, 0xC1, 0x00);       // cmpsd xmm0, xmm1, 0 (xmm0 == xmm1) 
-                    BYTE4(0x48, 0x83, 0xC4, 0x08);             // add rsp, 8
+                    FLAG(BYTE4(0x48, 0x83, 0xC4, 0x08));             // add rsp, 8
                     BYTE3(0x49, 0xC7, 0xC5);                   // mov r13, 1
                     ADDRESS(0x1);
                     BYTE5(0xF2, 0x49, 0x0F, 0x2A, 0xCD);       // cvtsi2sd xmm1, r13
                     BYTE4(0x66, 0x0F, 0x54, 0xC1);             // andpd xmm0, xmm1
 
-                    SAVE_XMM0(5);
+                    SAVE_XMM0();
                     BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);       // movsd [rsp], xmm0
 
                     break;
@@ -1135,13 +1030,13 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                     XMM0_RSP(8);
                     IF_XMM0(BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08)); // movsd xmm0, [rsp + 8]
                     BYTE5(0xF2, 0x0F, 0xC2, 0xC1, 0x05);       // cmpsd xmm0, xmm1, 5 (xmm0 > xmm1) 
-                    BYTE4(0x48, 0x83, 0xC4, 0x08);             // add rsp, 8
+                    FLAG(BYTE4(0x48, 0x83, 0xC4, 0x08));             // add rsp, 8
                     BYTE3(0x49, 0xC7, 0xC5);                   // mov r13, 1
                     ADDRESS(0x1);
                     BYTE5(0xF2, 0x49, 0x0F, 0x2A, 0xCD);       // cvtsi2sd xmm1, r13
                     BYTE4(0x66, 0x0F, 0x54, 0xC1);             // andpd xmm0, xmm1
 
-                    SAVE_XMM0(5);
+                    SAVE_XMM0();
                     BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);       // movsd [rsp], xmm0
 
                     break;
@@ -1153,13 +1048,13 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                     XMM0_RSP(8);
                     IF_XMM0(BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08)); // movsd xmm0, [rsp + 8]
                     BYTE5(0xF2, 0x0F, 0xC2, 0xC1, 0x02);       // cmpsd xmm0, xmm1, 2 (xmm0 <= xmm1) 
-                    BYTE4(0x48, 0x83, 0xC4, 0x08);             // add rsp, 8
+                    FLAG(BYTE4(0x48, 0x83, 0xC4, 0x08));             // add rsp, 8
                     BYTE3(0x49, 0xC7, 0xC5);                   // mov r13, 1
                     ADDRESS(0x1);
                     BYTE5(0xF2, 0x49, 0x0F, 0x2A, 0xCD);       // cvtsi2sd xmm1, r13
                     BYTE4(0x66, 0x0F, 0x54, 0xC1);             // andpd xmm0, xmm1
 
-                    SAVE_XMM0(5);
+                    SAVE_XMM0();
                     BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);       // movsd [rsp], xmm0
 
                     break;
@@ -1171,13 +1066,13 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                     XMM0_RSP(8);
                     IF_XMM0(BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08)); // movsd xmm0, [rsp + 8]
                     BYTE5(0xF2, 0x0F, 0xC2, 0xC1, 0x4);       // cmpsd xmm0, xmm1, 4 (xmm0 != xmm1) 
-                    BYTE4(0x48, 0x83, 0xC4, 0x08);             // add rsp, 8
+                    FLAG(BYTE4(0x48, 0x83, 0xC4, 0x08));             // add rsp, 8
                     BYTE3(0x49, 0xC7, 0xC5);                   // mov r13, 1
                     ADDRESS(0x1);
                     BYTE5(0xF2, 0x49, 0x0F, 0x2A, 0xCD);      // cvtsi2sd xmm1, r13
                     BYTE4(0x66, 0x0F, 0x54, 0xC1);             // andpd xmm0, xmm1
 
-                    SAVE_XMM0(5);
+                    SAVE_XMM0();
                     BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);       // movsd [rsp], xmm0
 
                     break;
@@ -1219,7 +1114,7 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                     BYTE5(0xF2, 0x0F, 0x10, 0x0C, 0x24);  // movsd xmm1, [rsp]
                     BYTE4(0xF2, 0x0F, 0x51, 0xC1);        // sqrtsd xmm0, xmm1
 
-                    SAVE_XMM0(5);
+                    SAVE_XMM0();
                     BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);  // movsd [rsp], xmm0
                     break;
                 }
@@ -1284,216 +1179,3 @@ void Find_locale_var(struct Tree* tree, struct Node* current_node, struct Code* 
     if (current_node->left  != nullptr) Find_locale_var(tree, current_node->left,  info);
     if (current_node->right != nullptr) Find_locale_var(tree, current_node->right, info);
 }
-
-
-//=============================================================================================================
-
-void Tree_create(struct Tree* tree, struct Text* text, const char* name_program)
-{
-    Tree_null_check(tree);
-    TREE_ASSERT_OK(tree);
-    assert(text != nullptr);
-
-    size_t number_line = 0;
-
-    tree->name_equation = Get_name_file(name_program);
-    tree->root = Node_create(tree, nullptr, text, &number_line);
-}
-
-struct Node* Node_create(struct Tree* tree, struct Node* previous_node, struct Text* text, size_t* number_line)
-{
-    char* begin = (text->lines)[*number_line].str;
-    Skip_separator(&begin);
-
-    if (*begin == '{')
-    {
-        ++(*number_line);
-        begin = (text->lines)[*number_line].str;
-        Skip_separator(&begin);
-
-        char* word = Get_word(begin);
-        
-        if (strcmp(word, "nil") == 0)
-        {
-            free(word);
-
-            ++(*number_line);
-            begin = (text->lines)[*number_line].str;
-            Skip_separator(&begin);
-
-            if (*begin == '}') ++(*number_line);
-            else
-            {
-                printf("Syntax error: line #%d\n", *number_line);
-            }
-
-            return nullptr;
-        }
-
-        else 
-        {   
-            struct Node* current_node = nullptr;
-
-            if (strcmp(word, "DEC") == 0)
-            {
-                current_node = Node_create_and_fill(nullptr, 
-                                                    DECLARATE, word, NAN, previous_node, 
-                                                    nullptr);
-            }
-
-            else if (strcmp(word, "LR") == 0)
-            {
-                current_node = Node_create_and_fill(nullptr, 
-                                                    LR, word, NAN, previous_node, 
-                                                    nullptr);
-            }
-
-            else if (word[0] == '$')
-            {   
-                current_node = Node_create_and_fill(nullptr, 
-                                                    FUNC, Name_key_word(word + 1), Code_key_word(word + 1), previous_node, 
-                                                    nullptr);
-                free(word);
-            }
-
-            else if ((word[0] == '-' && isdigit(word[1])) || isdigit(word[0]))
-            {
-                current_node = Node_create_and_fill(nullptr, 
-                                                    NUMBER, nullptr, strtod(begin, &begin), previous_node,
-                                                    nullptr);
-                free(word);
-            }
-
-            else if (Is_key_word(word))
-            {
-                current_node = Node_create_and_fill(nullptr, 
-                                                    Type_key_word(word), Name_key_word(word), Code_key_word(word), previous_node,
-                                                    nullptr);
-                
-                free(word);
-            }
-
-            else 
-            {
-                current_node = Node_create_and_fill(nullptr, 
-                                                    VAR, word, NAN, previous_node,
-                                                    nullptr);
-            }
-
-            ++(*number_line);
-            ++(tree->size);
-
-            current_node->left  = Node_create(tree, current_node, text, number_line);
-            current_node->right = Node_create(tree, current_node, text, number_line);
-
-            begin = (text->lines)[*number_line].str;
-            Skip_separator(&begin);
-
-            if (*begin == '}') ++(*number_line);
-            else
-            {
-                printf("Syntax error: line #%d\n", *number_line);
-            }
-
-            return current_node;
-        }
-    }
-
-    return nullptr;
-}
-
-char* Get_name_file(const char* file)
-{
-    assert(file != nullptr);
-
-    const char* begin = file;
-    while ((strchr(begin, '/')) != nullptr) begin = strchr(begin, '/') + 1;
-    char* name_file   = strdup(begin);
-
-    char* pointer_format  = strchr(name_file, '.');
-    if   (pointer_format != nullptr) *pointer_format = '\0';
-
-    return name_file;
-}
-
-char* Get_word(char* begin)
-{
-    char* current_symbol = begin;
-
-    while (!isspace(*current_symbol) && *current_symbol != '\0' && *current_symbol != '\n') ++current_symbol;
-
-    return strndup(begin, current_symbol - begin); 
-}
-
-size_t Skip_separator(char** string)
-{
-    assert(string != nullptr);
-
-    size_t count = 0;
-
-    while ((isspace((int)(unsigned char)**string) || **string == '\n') && **string != '\0')
-    {
-        ++(*string);
-        ++count;
-    }
-
-    return count; 
-}
-
-char* Name_key_word(char* str)
-{
-    #define KEY_WORD(replace, len, word, type, value, number, path) if (strcmp(word, str) == 0) return strdup(word);
-
-    #ifdef HG
-        #include "../libr/key_words_hg.h"
-    #else 
-        #include "../libr/key_words_rm.h"
-    #endif
-    #undef KEY_WORD
-
-    return strdup(str);
-}
-
-int Type_key_word(char* str)
-{
-    #define KEY_WORD(replace, len, word, type, value, number, path) if (strcmp(word, str) == 0) return type;
-
-    #ifdef HG
-        #include "../libr/key_words_hg.h"
-    #else 
-        #include "../libr/key_words_rm.h"
-    #endif
-    #undef KEY_WORD
-
-    return 0;
-}
-
-double Code_key_word(char* str)
-{
-    #define KEY_WORD(replace, len, word, type, value, number, path) if (strcmp(word, str) == 0) return value;
-
-    #ifdef HG
-        #include "../libr/key_words_hg.h"
-    #else 
-        #include "../libr/key_words_rm.h"
-    #endif
-    #undef KEY_WORD
-
-    return NAN;
-}
-
-int Is_key_word(char* str)
-{
-    #define KEY_WORD(replace, len, word, type, value, number, path) if (strcmp(word, str) == 0) return 1;
-
-    #ifdef HG
-        #include "../libr/key_words_hg.h"
-    #else 
-        #include "../libr/key_words_rm.h"
-    #endif
-    #undef KEY_WORD
-
-    return 0;
-}
-
-//=============================================================================================================

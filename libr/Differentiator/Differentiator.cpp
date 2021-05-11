@@ -253,13 +253,36 @@ void Neutral_delete(struct Tree* tree, struct Node* current_node)
         switch (OP)
         {
             case ADD:
+            if (LNODE != nullptr)
+                {
+                    if ((LNODE->type == NUMBER) && (Is_equal(LNODE->value, 0)))
+                    {
+                        Re_linking_subtree(tree, current_node, RNODE, LNODE);
+                        return;
+                    }
+                }
+
+            if (RNODE != nullptr)
+            {
+                if ((RNODE->type == NUMBER) && (Is_equal(RNODE->value, 0)))
+                {
+                    Re_linking_subtree(tree, current_node, LNODE, RNODE);
+                    return;
+                }
+            }
+            
+            break;
+
             case SUB:
             {
                 if (LNODE != nullptr)
                 {
                     if ((LNODE->type == NUMBER) && (Is_equal(LNODE->value, 0)))
                     {
-                        Re_linking_subtree(tree, current_node, RNODE, LNODE);
+                        Node_destruct(LNODE); 
+                        --tree->size;
+                        LNODE = nullptr;
+
                         return;
                     }
                 }

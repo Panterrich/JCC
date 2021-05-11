@@ -1,5 +1,5 @@
 
-#include "compiler.h"
+#include "GUI.h"
 
 int Create_window(sf:: Music* music, sf:: Music* joke_music)
 {
@@ -8,23 +8,23 @@ int Create_window(sf:: Music* music, sf:: Music* joke_music)
     sf::Texture background;
     sf::Sprite  background_image;
 
-    if (!background.loadFromFile("GUI/back.jpg"))
+    if (!background.loadFromFile("libr/GUI/back.jpg"))
     {
-        printf("ERROR: Couldn't display \"GUI/back.jpg\"\n");
+        printf("ERROR: Couldn't display \"libr/GUI/back.jpg\"\n");
         return 1;
     }
 
     background_image.setTexture(background);
 
     sf::Font font;
-    font.loadFromFile("GUI/Minecraft.ttf");
+    font.loadFromFile("libr/GUI/Minecraft.ttf");
 
     sf::Texture exit_button;
     sf::Sprite  exit_button_image;
 
-    if (!exit_button.loadFromFile("GUI/buttonN.png"))
+    if (!exit_button.loadFromFile("libr/GUI/buttonN.png"))
     {
-        printf("ERROR: Couldn't display \"GUI/buttonN.png\"\n");
+        printf("ERROR: Couldn't display \"libr/GUI/buttonN.png\"\n");
         return 1;
     }
     
@@ -35,9 +35,9 @@ int Create_window(sf:: Music* music, sf:: Music* joke_music)
     sf::Texture compile_button;
     sf::Sprite  compile_button_image;
 
-    if (!compile_button.loadFromFile("GUI/buttonY.png"))
+    if (!compile_button.loadFromFile("libr/GUI/buttonY.png"))
     {
-        printf("ERROR: Couldn't display \"GUI/buttonY.png\"\n");
+        printf("ERROR: Couldn't display \"libr/GUI/buttonY.png\"\n");
         return 1;
     }
     
@@ -48,9 +48,9 @@ int Create_window(sf:: Music* music, sf:: Music* joke_music)
     sf::Texture mute_button;
     sf::Sprite  mute_button_image;
 
-    if (!mute_button.loadFromFile("GUI/mute.png"))
+    if (!mute_button.loadFromFile("libr/GUI/mute.png"))
     {
-        printf("ERROR: Couldn't display \"GUI/mute.png\"\n");
+        printf("ERROR: Couldn't display \"libr/GUI/mute.png\"\n");
         return 1;
     }
     
@@ -62,9 +62,9 @@ int Create_window(sf:: Music* music, sf:: Music* joke_music)
     sf::Texture unmute_button;
     sf::Sprite  unmute_button_image;
 
-    if (!unmute_button.loadFromFile("GUI/unmute.png"))
+    if (!unmute_button.loadFromFile("libr/GUI/unmute.png"))
     {
-        printf("ERROR: Couldn't display \"GUI/unmute.png\"\n");
+        printf("ERROR: Couldn't display \"libr/GUI/unmute.png\"\n");
         return 1;
     }
     
@@ -75,9 +75,9 @@ int Create_window(sf:: Music* music, sf:: Music* joke_music)
     sf::Texture to_be_continued;
     sf::Sprite  to_be_continued_image;
 
-    if (!to_be_continued.loadFromFile("GUI/to-be-continued.jpg"))
+    if (!to_be_continued.loadFromFile("libr/GUI/to-be-continued.jpg"))
     {
-        printf("ERROR: Couldn't display \"GUI/to-be-continued.jpg\"\n");
+        printf("ERROR: Couldn't display \"libr/GUI/to-be-continued.jpg\"\n");
         return 1;
     }
     
@@ -316,12 +316,93 @@ int Create_window(sf:: Music* music, sf:: Music* joke_music)
         {   
             music->stop();
             joke_music->play();
+            joke_music->setVolume(100);
 
             delay = 0;
-            for (size_t i = 0; i < 4500000000; ++i);
+            sleep(10);
             continued = 1;
         }
     } 
+
+    return 0;
+}
+
+int Compile(const char* name_program)
+{
+    char* locale = setlocale(LC_ALL, NULL);
+
+    setlocale(LC_ALL, "ja_JP.utf8");
+
+    if (name_program == nullptr)
+    {
+        return 1;
+    }
+  
+    FILE* file = fopen(name_program, "rb");
+
+    if (file == nullptr)
+    {
+        return 1;
+    }
+
+    struct Program program = {};
+    Program_create(file, &program);
+    
+    fclose(file);
+
+    struct Stack nodes = {};
+    STACK_CONSTRUCT(&nodes, INITIAL_CAPACITY);
+
+    Tokenizer(&program, &nodes);
+
+    struct Tree tree = {};
+    TREE_CONSTRUCT(&tree);
+
+    GetProg(&tree, &nodes, name_program);
+    Free_nodes(&nodes);
+
+    Tree_print(&tree);
+
+    setlocale(LC_ALL, locale);
+    
+    char name_output[MAX_SIZE_COMMAND] = {};
+    sprintf(name_output, "files/%s.me", tree.name_equation);
+
+    Tree_destruct(&tree);
+
+    file = fopen(name_output, "rb");
+
+    if (file == nullptr)
+    {
+        printf("Введите корректное имя дерева\n");
+        return 1;
+    }
+
+    struct Text text = {};
+    Create_text(file, &text);
+
+    fclose(file);
+
+    TREE_CONSTRUCT(&tree);
+
+    Tree_create(&tree, &text, name_program);
+    Free_memory(&text);
+
+    Tree_processing(&tree);
+
+    sprintf(name_output, "files/%s.elf", tree.name_equation);
+
+    FILE* elf = fopen(name_output, "wb");
+
+    Create_elf(&tree, elf);
+
+    fclose(elf);
+
+    Tree_destruct(&tree);
+
+    char command[MAX_SIZE_COMMAND] = {};
+    sprintf(command, "chmod +x %s", name_output);
+    system(command);
 
     return 0;
 }

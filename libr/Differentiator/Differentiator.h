@@ -18,7 +18,6 @@
 //============================================================
 
 const int MAX_SIZE_STR            = 200;
-const int MAX_SIZE_COMMAND        = 400;
 const int MAX_SIZE_NAME_VARIABLES = 20;
 const int MAX_SIZE_NAME_FUNC      = 10;
 

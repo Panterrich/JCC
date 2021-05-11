@@ -4,6 +4,7 @@
 #include "../libr/Onegin/Onegin.h"
 #include "../libr/Tree/Tree.h"
 #include "../libr/Stack/Guard.h"
+#include "../libr/LibEnd.h"
 
 //================================================================================================================
 
@@ -15,22 +16,7 @@ struct Program
 
 //================================================================================================================
 
-enum KEY_WORDS
-{
-    #define KEY_WORD(replace, len, word, type, value, number, path) KEY##_##number = value,
-
-    #ifdef HG
-        #include "../libr/key_words_hg.h"
-    #else 
-        #include "../libr/key_words_rm.h"
-    #endif
-    #undef KEY_WORD
-};
-
-//================================================================================================================
-
 const size_t INITIAL_CAPACITY = 20;
-const size_t MAX_SIZE_COMMAND = 300;
 
 //================================================================================================================
 
@@ -38,13 +24,9 @@ void Program_create(FILE* file, struct Program* program);
 
 void Tokenizer(struct Program* program, struct Stack* nodes);
 
-size_t Skip_separator(char** string);
-
 void Program_destruct(struct Program* program);
 
 void Free_nodes(struct Stack* nodes);
-
-char* Get_name_file(const char* file);
 
 //================================================================================================================
 
@@ -103,10 +85,6 @@ void Require(struct Tree* tree, struct Stack* nodes, size_t* index_node, int typ
 void Syntax_error(struct Stack* nodes, size_t index_node);
 
 //=============================================================================================================
-
-void Tree_print(struct Tree* tree);
-
-void Node_print(struct Node* current_node, FILE* file);
 
 const char* Get_path(int code);
 

@@ -13,8 +13,8 @@ all:
 	@$(MAKE) -f $(THIS_FILE) me
 	@$(MAKE) -f $(THIS_FILE) compiler
 
-JCC: libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp libr/Differentiator/Differentiator.cpp libr/hashtable/Hash_func.cpp JCC/frontend.cpp JCC/GUI.cpp JCC/middleend.cpp JCC/compiler.cpp JCC/main.cpp
-	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp JCC/frontend.cpp JCC/GUI.cpp JCC/middleend.cpp JCC/compiler.cpp JCC/main.cpp \
+JCC: libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp libr/Differentiator/Differentiator.cpp libr/hashtable/Hash_func.cpp libr/LibEnd.cpp Front-end/Frontend.cpp GUI/GUI.cpp Middle-end/Middleend.cpp Compiler/compiler.cpp GUI/main.cpp
+	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp Front-end/Frontend.cpp GUI/GUI.cpp Middle-end/Middleend.cpp Compiler/compiler.cpp GUI/main.cpp libr/LibEnd.cpp \
 	libr/Differentiator/Differentiator.cpp libr/hashtable/Hash_func.cpp -msse4.2 -mavx2 -march=native -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio -o build/JCC
 
 
@@ -41,13 +41,13 @@ clean_build:
 	rm -f build/me
 	rm -f build/compl
 
-fe-hg: libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp Front-end/Frontend.cpp Front-end/main.cpp 
+fe-hg: libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp libr/LibEnd.cpp Front-end/Frontend.cpp Front-end/main.cpp 
 	@echo $@  # print target name
-	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp Front-end/Frontend.cpp Front-end/main.cpp -o build/fe-hg -D HG
+	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp libr/LibEnd.cpp Front-end/Frontend.cpp Front-end/main.cpp -o build/fe-hg -D HG
 
-fe-rm: libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp Front-end/Frontend.cpp Front-end/main.cpp
+fe-rm: libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp libr/LibEnd.cpp Front-end/Frontend.cpp Front-end/main.cpp
 	@echo $@  # print target name
-	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp Front-end/Frontend.cpp Front-end/main.cpp -o build/fe-rm
+	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp libr/LibEnd.cpp Front-end/Frontend.cpp Front-end/main.cpp -o build/fe-rm
 
 rfe-hg: libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp RFront-end/RFrontend.cpp RFront-end/main.cpp
 	@echo $@  # print target name
@@ -57,13 +57,13 @@ rfe-rm: libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin
 	@echo $@  # print target name
 	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp RFront-end/RFrontend.cpp RFront-end/main.cpp -o build/rfe-rm
 
-me: libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp libr/Differentiator/Differentiator.cpp Middle-end/Middleend.cpp Middle-end/main.cpp
+me: libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp libr/Differentiator/Differentiator.cpp libr/LibEnd.cpp Middle-end/Middleend.cpp Middle-end/main.cpp
 	@echo $@  # print target name
-	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp libr/Differentiator/Differentiator.cpp Middle-end/Middleend.cpp Middle-end/main.cpp -o build/me
+	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp libr/Differentiator/Differentiator.cpp libr/LibEnd.cpp Middle-end/Middleend.cpp Middle-end/main.cpp -o build/me
 
-compiler: Compiler/compiler.cpp Compiler/main.cpp libr/hashtable/Hash_func.cpp
+compiler: Compiler/compiler.cpp Compiler/main.cpp libr/hashtable/Hash_func.cpp libr/LibEnd.cpp
 	@echo $@  # print target name
-	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp Compiler/compiler.cpp Compiler/main.cpp libr/hashtable/Hash_func.cpp -msse4.2 -mavx2 -march=native -o build/compl
+	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp libr/LibEnd.cpp Compiler/compiler.cpp Compiler/main.cpp libr/hashtable/Hash_func.cpp -msse4.2 -mavx2 -march=native -o build/compl
 
 
 clean_all_image: 

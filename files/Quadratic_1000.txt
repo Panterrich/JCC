@@ -1,0 +1,106 @@
+Dopio Awaken 0 Yare Yare Daze
+Diavolo Awaken 0 Yare Yare Daze
+
+Kono, Giorno Giovanna, niwa yume ga aru ()
+Za Warudo! Toki wo Tomare!
+    Johnatan Awaken 2 Yare Yare Daze
+    Joseph Awaken 5 Yare Yare Daze
+    Jotaro Awaken 1 Yare Yare Daze
+
+    Mista Awaken 1000000 Yare Yare Daze
+    Gorudo Ekusuperiensu Rekuiemu (Mista USHYAAAA 0)
+    Za Warudo! Toki wo Tomare!
+        Polnaref Awaken Quadratic(Johnatan, Joseph, Jotaro) Yare Yare Daze
+        Mista Awaken Mista ARIARIARIARI 1 Yare Yare Daze
+    ROAD ROLLER DA!
+
+    Mousukoshite ora ora desuka (Polnaref NIIIIICE 2)
+    Za Warudo! Toki wo Tomare!
+        Arrivederci Polnaref Yare Yare Daze
+        Nigerundayo Dopio Yare Yare Daze
+        Nigerundayo Diavolo Yare Yare Daze
+    ROAD ROLLER DA!
+
+    Mousukoshite ora ora desuka (Polnaref NIIIIICE 1)
+    Za Warudo! Toki wo Tomare!
+        Arrivederci Polnaref Yare Yare Daze
+        Nigerundayo Dopio Yare Yare Daze
+    ROAD ROLLER DA!
+
+    Mousukoshite ora ora desuka (Polnaref NIIIIICE 0)
+    Za Warudo! Toki wo Tomare!
+        Arrivederci Polnaref Yare Yare Daze
+    ROAD ROLLER DA!
+
+    Mousukoshite ora ora desuka (Polnaref NIIIIICE -1)
+    Za Warudo! Toki wo Tomare!
+        Arrivederci Polnaref Yare Yare Daze
+    ROAD ROLLER DA!
+
+ROAD ROLLER DA!
+
+Quadratic(Johnatan, Joseph, Jotaro)
+Za Warudo! Toki wo Tomare!
+
+    Mousukoshite ora ora desuka (Is_equal(Johnatan, 0))
+    Za Warudo! Toki wo Tomare!
+        Line(Joseph, Jotaro) Kira Kuin baitsa dasuto Yare Yare Daze
+    ROAD ROLLER DA!
+
+    Discr Awaken Joseph MUDAMUDAMUDA Joseph ARIARIARIARI 4 MUDAMUDAMUDA Johnatan MUDAMUDAMUDA Jotaro Yare Yare Daze
+
+    Mousukoshite ora ora desuka (Is_equal(Discr, 0))
+    Za Warudo! Toki wo Tomare!
+        Dopio Awaken 0 ARIARIARIARI Joseph HORAHORAHORA 2 HORAHORAHORA Johnatan Yare Yare Daze
+        1 Kira Kuin baitsa dasuto Yare Yare Daze
+    ROAD ROLLER DA!
+
+    Mousukoshite ora ora desuka (Discr USHYAAAA 0)
+    Za Warudo! Toki wo Tomare!
+        Dopio Awaken (0 ARIARIARIARI Joseph ORAORAORAORA Hebunzu Doa(Discr)) HORAHORAHORA 2 HORAHORAHORA Johnatan Yare Yare Daze
+        Diavolo Awaken (0 ARIARIARIARI Joseph ARIARIARIARI Hebunzu Doa(Discr)) HORAHORAHORA 2 HORAHORAHORA Johnatan Yare Yare Daze
+        2 Kira Kuin baitsa dasuto Yare Yare Daze
+    ROAD ROLLER DA!
+
+    Mousukoshite ora ora desuka (Discr URYAAAAA 0)
+    Za Warudo! Toki wo Tomare!
+        0 Kira Kuin baitsa dasuto Yare Yare Daze
+    ROAD ROLLER DA!
+
+ROAD ROLLER DA!
+
+Is_equal(Number, Value)
+Za Warudo! Toki wo Tomare!
+
+    Mousukoshite ora ora desuka (Number ARIARIARIARI Value URYAAAAA 0.00001)
+    Za Warudo! Toki wo Tomare!
+        Mousukoshite ora ora desuka (Number ARIARIARIARI Value USHYAAAA -0.00001)
+        Za Warudo! Toki wo Tomare!
+            1 Kira Kuin baitsa dasuto Yare Yare Daze
+        ROAD ROLLER DA!
+    ROAD ROLLER DA!
+
+    0 Kira Kuin baitsa dasuto Yare Yare Daze
+
+ROAD ROLLER DA!
+
+Line(Joseph, Jotaro)
+Za Warudo! Toki wo Tomare!
+    Mousukoshite ora ora desuka (Is_equal(Joseph, 0))
+    Za Warudo! Toki wo Tomare!
+
+        Mousukoshite ora ora desuka (Is_equal(Jotaro, 0))
+        Za Warudo! Toki wo Tomare!
+            
+        -1 Kira Kuin baitsa dasuto Yare Yare Daze
+
+        ROAD ROLLER DA!
+
+        0 Kira Kuin baitsa dasuto Yare Yare Daze
+
+    ROAD ROLLER DA!
+   
+    Dopio Awaken ARIARIARIARI Jotaro HORAHORAHORA Joseph Yare Yare Daze  
+    1 Kira Kuin baitsa dasuto Yare Yare Daze
+
+ROAD ROLLER DA!
