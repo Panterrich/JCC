@@ -12,6 +12,7 @@ all:
 	@$(MAKE) -f $(THIS_FILE) rfe-hg
 	@$(MAKE) -f $(THIS_FILE) me
 	@$(MAKE) -f $(THIS_FILE) compiler
+	@$(MAKE) -f $(THIS_FILE) JCC
 
 JCC: libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp libr/Differentiator/Differentiator.cpp libr/hashtable/Hash_func.cpp libr/LibEnd.cpp Front-end/Frontend.cpp GUI/GUI.cpp Middle-end/Middleend.cpp Compiler/compiler.cpp GUI/main.cpp
 	g++ libr/Stack/Stack.cpp libr/Stack/Guard.cpp libr/Tree/Tree.cpp libr/Onegin/Str_lib.cpp Front-end/Frontend.cpp GUI/GUI.cpp Middle-end/Middleend.cpp Compiler/compiler.cpp GUI/main.cpp libr/LibEnd.cpp \

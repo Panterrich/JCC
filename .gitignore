@@ -10,7 +10,7 @@ build/rfe-rm
 build/rfe-hg
 build/JCC
 
-
+callgrind*
 log.txt
 my_elf
 my_elf.asm

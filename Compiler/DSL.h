@@ -16,13 +16,12 @@
 #define CLEAR_XMM0() if (reg->xmm0_save == 1) reg->xmm0_save = 0; reg->xmm0_rip = 0; reg->xmm0_rsp = 0; reg->xmm0_count = 0;
 #define CLEAR_XMM1() if (reg->xmm1_save == 1) reg->xmm1_save = 0; reg->xmm1_rip = 0; reg->xmm1_rsp = 0; reg->xmm1_count = 0;
 
-#define NOPE_XMM0()  if (reg->xmm0_save == 1)                              \
-                     {                                                     \
-                        bytecode[reg->xmm0_rip + 0] = (char)0x48;          \
-                        bytecode[reg->xmm0_rip + 1] = (char)0x83;          \
-                        bytecode[reg->xmm0_rip + 2] = (char)0xC4;          \
-                        bytecode[reg->xmm0_rip + 3] = (char)0x08;          \
-                        bytecode[reg->xmm0_rip + 4] = (char)0x90;          \
+#define NOPE_XMM0()  if (reg->xmm1_save == 1)                        \
+                     {                                               \
+                        for (size_t i = 0; i < reg->xmm1_count; ++i) \
+                        {                                            \
+                            bytecode[reg->xmm1_rip + i] = 0x90;      \
+                        }                                            \
                      }                                                     
 
 #define NOPE_XMM1()  if (reg->xmm1_save == 1)                        \
@@ -33,9 +32,8 @@
                         }                                            \
                      }          
 
-#define IF_XMM0(code) if (reg->xmm0_save == 1 && reg->xmm0_rsp == 0) {NOPE_XMM0(); reg->flag = 1;} else {code}
-#define IF_XMM1(code) if (reg->xmm1_save == 1 && reg->xmm1_rsp == 0) {NOPE_XMM1(); reg->flag = 1;} else {code}
-#define FLAG(code)    if (reg->flag == 1)                            {reg->flag = 0;}              else {code}
+#define IF_XMM0(code) if (reg->xmm0_save == 1 && reg->xmm0_rsp == 0) {NOPE_XMM0();} else {code}
+#define IF_XMM1(code) if (reg->xmm1_save == 1 && reg->xmm1_rsp == 0) {NOPE_XMM1();} else {code}
 
 #define XMM0_RSP(n) reg->xmm0_rsp += n;
 #define XMM1_RSP(n) reg->xmm1_rsp += n;

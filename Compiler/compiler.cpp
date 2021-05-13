@@ -902,7 +902,7 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                     IF_XMM0(BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08)); // movsd xmm0, [rsp + 8]
 
                     BYTE4(0xF2, 0x0F, 0x58, 0xC1);                      // addsd xmm0, xmm1
-                    FLAG(BYTE4(0x48, 0x83, 0xC4, 0x08));                // add rsp, 8
+                    BYTE4(0x48, 0x83, 0xC4, 0x08);                // add rsp, 8
 
                     SAVE_XMM0();
                     BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);                // movsd [rsp], xmm0
@@ -918,7 +918,7 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                         XMM0_RSP(8);
                         IF_XMM0(BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08)); // movsd xmm0, [rsp + 8]
                         BYTE4(0xF2, 0x0F, 0x5C, 0xC1);                      // subsd xmm0, xmm1
-                        FLAG(BYTE4(0x48, 0x83, 0xC4, 0x08));                // add rsp, 8
+                        BYTE4(0x48, 0x83, 0xC4, 0x08);                // add rsp, 8
 
                         SAVE_XMM0();
                         BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);                // movsd [rsp], xmm0
@@ -944,7 +944,7 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                     XMM0_RSP(8);
                     IF_XMM0(BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08)); // movsd xmm0, [rsp + 8]
                     BYTE4(0xF2, 0x0F, 0x59, 0xC1);                      // mulsd xmm0, xmm1
-                    FLAG(BYTE4(0x48, 0x83, 0xC4, 0x08));                      // add rsp, 8
+                    BYTE4(0x48, 0x83, 0xC4, 0x08);                      // add rsp, 8
 
                     SAVE_XMM0();
                     BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);                // movsd [rsp], xmm0
@@ -958,7 +958,7 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                     XMM0_RSP(8);
                     IF_XMM0(BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08)); // movsd xmm0, [rsp + 8]
                     BYTE4(0xF2, 0x0F, 0x5E, 0xC1);                      // divsd xmm0, xmm1
-                    FLAG(BYTE4(0x48, 0x83, 0xC4, 0x08));                      // add rsp, 8
+                    BYTE4(0x48, 0x83, 0xC4, 0x08);                      // add rsp, 8
 
                     SAVE_XMM0();
                     BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);                // movsd [rsp], xmm0
@@ -976,7 +976,7 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                     XMM0_RSP(8);
                     IF_XMM0(BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08)); // movsd xmm0, [rsp + 8]
                     BYTE5(0xF2, 0x0F, 0xC2, 0xC1, 0x06);       // cmpsd xmm0, xmm1, 6 (xmm0 > xmm1) 
-                    FLAG(BYTE4(0x48, 0x83, 0xC4, 0x08));             // add rsp, 8
+                    BYTE4(0x48, 0x83, 0xC4, 0x08);             // add rsp, 8
                     BYTE3(0x49, 0xC7, 0xC5);                   // mov r13, 1
                     ADDRESS(0x1);
                     BYTE5(0xF2, 0x49, 0x0F, 0x2A, 0xCD);       // cvtsi2sd xmm1, r13
@@ -994,7 +994,7 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                     XMM0_RSP(8);
                     IF_XMM0(BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08)); // movsd xmm0, [rsp + 8]
                     BYTE5(0xF2, 0x0F, 0xC2, 0xC1, 0x01);       // cmpsd xmm0, xmm1, 1 (xmm0 < xmm1) 
-                    FLAG(BYTE4(0x48, 0x83, 0xC4, 0x08));             // add rsp, 8
+                    BYTE4(0x48, 0x83, 0xC4, 0x08);             // add rsp, 8
                     BYTE3(0x49, 0xC7, 0xC5);                   // mov r13, 1
                     ADDRESS(0x1);
                     BYTE5(0xF2, 0x49, 0x0F, 0x2A, 0xCD);       // cvtsi2sd xmm1, r13
@@ -1012,7 +1012,7 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                     XMM0_RSP(8);
                     IF_XMM0(BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08)); // movsd xmm0, [rsp + 8]
                     BYTE5(0xF2, 0x0F, 0xC2, 0xC1, 0x00);       // cmpsd xmm0, xmm1, 0 (xmm0 == xmm1) 
-                    FLAG(BYTE4(0x48, 0x83, 0xC4, 0x08));             // add rsp, 8
+                    BYTE4(0x48, 0x83, 0xC4, 0x08);             // add rsp, 8
                     BYTE3(0x49, 0xC7, 0xC5);                   // mov r13, 1
                     ADDRESS(0x1);
                     BYTE5(0xF2, 0x49, 0x0F, 0x2A, 0xCD);       // cvtsi2sd xmm1, r13
@@ -1030,7 +1030,7 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                     XMM0_RSP(8);
                     IF_XMM0(BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08)); // movsd xmm0, [rsp + 8]
                     BYTE5(0xF2, 0x0F, 0xC2, 0xC1, 0x05);       // cmpsd xmm0, xmm1, 5 (xmm0 > xmm1) 
-                    FLAG(BYTE4(0x48, 0x83, 0xC4, 0x08));             // add rsp, 8
+                    BYTE4(0x48, 0x83, 0xC4, 0x08);             // add rsp, 8
                     BYTE3(0x49, 0xC7, 0xC5);                   // mov r13, 1
                     ADDRESS(0x1);
                     BYTE5(0xF2, 0x49, 0x0F, 0x2A, 0xCD);       // cvtsi2sd xmm1, r13
@@ -1048,7 +1048,7 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                     XMM0_RSP(8);
                     IF_XMM0(BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08)); // movsd xmm0, [rsp + 8]
                     BYTE5(0xF2, 0x0F, 0xC2, 0xC1, 0x02);       // cmpsd xmm0, xmm1, 2 (xmm0 <= xmm1) 
-                    FLAG(BYTE4(0x48, 0x83, 0xC4, 0x08));             // add rsp, 8
+                    BYTE4(0x48, 0x83, 0xC4, 0x08);             // add rsp, 8
                     BYTE3(0x49, 0xC7, 0xC5);                   // mov r13, 1
                     ADDRESS(0x1);
                     BYTE5(0xF2, 0x49, 0x0F, 0x2A, 0xCD);       // cvtsi2sd xmm1, r13
@@ -1066,7 +1066,7 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                     XMM0_RSP(8);
                     IF_XMM0(BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08)); // movsd xmm0, [rsp + 8]
                     BYTE5(0xF2, 0x0F, 0xC2, 0xC1, 0x4);       // cmpsd xmm0, xmm1, 4 (xmm0 != xmm1) 
-                    FLAG(BYTE4(0x48, 0x83, 0xC4, 0x08));             // add rsp, 8
+                    BYTE4(0x48, 0x83, 0xC4, 0x08);             // add rsp, 8
                     BYTE3(0x49, 0xC7, 0xC5);                   // mov r13, 1
                     ADDRESS(0x1);
                     BYTE5(0xF2, 0x49, 0x0F, 0x2A, 0xCD);      // cvtsi2sd xmm1, r13
