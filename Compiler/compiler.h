@@ -29,7 +29,6 @@ const int MAX_SIZE_HASH_TABLE_LABELS = 500;
 static const char BUFFER[1 << 20] = {};
 
 //=============================================================================================================
-
 struct Registers
 {
     bool xmm0_save;

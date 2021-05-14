@@ -429,42 +429,42 @@ void Print_op(struct Tree* tree, struct Node* current_node, struct Code* info, s
 
     if (current_node == nullptr) return;
 
-    if (current_node->type == LR && current_node->value == 3)
+    if (current_node->type == LR && current_node->value == KEY_LR)
     {
         return;
     }
 
-    if (current_node->type == FUNC && current_node->value == 10)
+    if (current_node->type == FUNC && current_node->value == KEY_PRINT)
     {
         Print_print(tree, current_node, info, count_var, bytecode, reg);
         return;
     }
 
-    if (current_node->type == FUNC && current_node->value == 12)
+    if (current_node->type == FUNC && current_node->value == KEY_PRINTF)
     {
         Print_printf(tree, current_node, info, count_var, bytecode, reg);
         return;
     }
 
-    if (current_node->type == FUNC && current_node->value == 11)
+    if (current_node->type == FUNC && current_node->value == KEY_SCAN)
     {
         Print_scan(tree, current_node, info, count_var, bytecode, reg);
         return;
     }
 
-    if (current_node->type == OPERATION && current_node->value == 30)
+    if (current_node->type == OPERATION && current_node->value == KEY_IF)
     {   
         Print_if(tree, current_node, info, count_var, bytecode, reg);
         return;
     }
 
-    if (current_node->type == OPERATION && current_node->value == 31)
+    if (current_node->type == OPERATION && current_node->value == KEY_WHILE)
     {
         Print_while(tree, current_node, info, count_var, bytecode, reg);
         return;
     }
 
-    if (current_node->type == OPERATION && current_node->value == 32)
+    if (current_node->type == OPERATION && current_node->value == KEY_ASSIGN)
     {
         Print_assign(tree, current_node, info, count_var, bytecode, reg);
         return;
@@ -894,7 +894,7 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
 
             switch ((int)current_node->value)
             {
-                case 41: //ADD
+                case KEY_ADD:
                 {
                     BYTE5(0xF2, 0x0F, 0x10, 0x0C, 0x24);                // movsd xmm1, [rsp]
 
@@ -902,14 +902,15 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                     IF_XMM0(BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08)); // movsd xmm0, [rsp + 8]
 
                     BYTE4(0xF2, 0x0F, 0x58, 0xC1);                      // addsd xmm0, xmm1
-                    BYTE4(0x48, 0x83, 0xC4, 0x08);                // add rsp, 8
+                    BYTE4(0x48, 0x83, 0xC4, 0x08);                      // add rsp, 8
 
                     SAVE_XMM0();
                     BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);                // movsd [rsp], xmm0
 
                     break;
                 }
-                case 42: // SUB
+
+                case KEY_SUB:
                 {
                     if (current_node->left != nullptr)
                     {
@@ -918,7 +919,7 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                         XMM0_RSP(8);
                         IF_XMM0(BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08)); // movsd xmm0, [rsp + 8]
                         BYTE4(0xF2, 0x0F, 0x5C, 0xC1);                      // subsd xmm0, xmm1
-                        BYTE4(0x48, 0x83, 0xC4, 0x08);                // add rsp, 8
+                        BYTE4(0x48, 0x83, 0xC4, 0x08);                      // add rsp, 8
 
                         SAVE_XMM0();
                         BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);                // movsd [rsp], xmm0
@@ -930,14 +931,14 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                         BYTE4(0x66, 0x0F, 0x57, 0xC0);             // xorpd xmm0, xmm0
                         BYTE4(0xF2, 0x0F, 0x5C, 0xC1);             // subsd xmm0, xmm1
 
-                        //SAVE_XMM0(5);
                         BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);       // movsd [rsp], xmm0
                     }
                    
 
                     break;
                 }
-                case 43: // MUL
+
+                case KEY_MUL:
                 {
                     BYTE5(0xF2, 0x0F, 0x10, 0x0C, 0x24);                // movsd xmm1, [rsp]
 
@@ -951,7 +952,8 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
 
                     break;
                 }
-                case 44: // DIV
+
+                case KEY_DIV: 
                 {
                     BYTE5(0xF2, 0x0F, 0x10, 0x0C, 0x24);                // movsd xmm1, [rsp]
 
@@ -965,115 +967,122 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
 
                     break;
                 }
-                case 45: // POW
+
+                case KEY_POW:
                 {
                     break;
-                }   
-                case 46: // BAA
+                }  
+
+                case KEY_BAA:
                 {
-                    BYTE5(0xF2, 0x0F, 0x10, 0x0C, 0x24);       // movsd xmm1, [rsp]
+                    BYTE5(0xF2, 0x0F, 0x10, 0x0C, 0x24);                // movsd xmm1, [rsp]
 
                     XMM0_RSP(8);
                     IF_XMM0(BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08)); // movsd xmm0, [rsp + 8]
-                    BYTE5(0xF2, 0x0F, 0xC2, 0xC1, 0x06);       // cmpsd xmm0, xmm1, 6 (xmm0 > xmm1) 
-                    BYTE4(0x48, 0x83, 0xC4, 0x08);             // add rsp, 8
-                    BYTE3(0x49, 0xC7, 0xC5);                   // mov r13, 1
+                    BYTE5(0xF2, 0x0F, 0xC2, 0xC1, 0x06);                // cmpsd xmm0, xmm1, 6 (xmm0 > xmm1) 
+                    BYTE4(0x48, 0x83, 0xC4, 0x08);                      // add rsp, 8
+                    BYTE3(0x49, 0xC7, 0xC5);                            // mov r13, 1
                     ADDRESS(0x1);
-                    BYTE5(0xF2, 0x49, 0x0F, 0x2A, 0xCD);       // cvtsi2sd xmm1, r13
-                    BYTE4(0x66, 0x0F, 0x54, 0xC1);             // andpd xmm0, xmm1
+                    BYTE5(0xF2, 0x49, 0x0F, 0x2A, 0xCD);                // cvtsi2sd xmm1, r13
+                    BYTE4(0x66, 0x0F, 0x54, 0xC1);                      // andpd xmm0, xmm1
 
                     SAVE_XMM0();
-                    BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);       // movsd [rsp], xmm0
-
-                    break;
-                }
-                case 47: // BAB
-                {
-                    BYTE5(0xF2, 0x0F, 0x10, 0x0C, 0x24);       // movsd xmm1, [rsp]
-
-                    XMM0_RSP(8);
-                    IF_XMM0(BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08)); // movsd xmm0, [rsp + 8]
-                    BYTE5(0xF2, 0x0F, 0xC2, 0xC1, 0x01);       // cmpsd xmm0, xmm1, 1 (xmm0 < xmm1) 
-                    BYTE4(0x48, 0x83, 0xC4, 0x08);             // add rsp, 8
-                    BYTE3(0x49, 0xC7, 0xC5);                   // mov r13, 1
-                    ADDRESS(0x1);
-                    BYTE5(0xF2, 0x49, 0x0F, 0x2A, 0xCD);       // cvtsi2sd xmm1, r13
-                    BYTE4(0x66, 0x0F, 0x54, 0xC1);             // andpd xmm0, xmm1
-
-                    SAVE_XMM0();
-                    BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);       // movsd [rsp], xmm0
+                    BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);                // movsd [rsp], xmm0
 
                     break;
                 }
-                case 48: // BAE
+
+                case KEY_BAB:
                 {
-                    BYTE5(0xF2, 0x0F, 0x10, 0x0C, 0x24);       // movsd xmm1, [rsp]
+                    BYTE5(0xF2, 0x0F, 0x10, 0x0C, 0x24);                // movsd xmm1, [rsp]
 
                     XMM0_RSP(8);
                     IF_XMM0(BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08)); // movsd xmm0, [rsp + 8]
-                    BYTE5(0xF2, 0x0F, 0xC2, 0xC1, 0x00);       // cmpsd xmm0, xmm1, 0 (xmm0 == xmm1) 
-                    BYTE4(0x48, 0x83, 0xC4, 0x08);             // add rsp, 8
-                    BYTE3(0x49, 0xC7, 0xC5);                   // mov r13, 1
+                    BYTE5(0xF2, 0x0F, 0xC2, 0xC1, 0x01);                // cmpsd xmm0, xmm1, 1 (xmm0 < xmm1) 
+                    BYTE4(0x48, 0x83, 0xC4, 0x08);                      // add rsp, 8
+                    BYTE3(0x49, 0xC7, 0xC5);                            // mov r13, 1
                     ADDRESS(0x1);
-                    BYTE5(0xF2, 0x49, 0x0F, 0x2A, 0xCD);       // cvtsi2sd xmm1, r13
-                    BYTE4(0x66, 0x0F, 0x54, 0xC1);             // andpd xmm0, xmm1
+                    BYTE5(0xF2, 0x49, 0x0F, 0x2A, 0xCD);                // cvtsi2sd xmm1, r13
+                    BYTE4(0x66, 0x0F, 0x54, 0xC1);                      // andpd xmm0, xmm1
 
                     SAVE_XMM0();
-                    BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);       // movsd [rsp], xmm0
+                    BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);                // movsd [rsp], xmm0
 
                     break;
                 }
-                case 49: // BAAE
+
+                case KEY_BAE:
                 {
-                    BYTE5(0xF2, 0x0F, 0x10, 0x0C, 0x24);       // movsd xmm1, [rsp]
+                    BYTE5(0xF2, 0x0F, 0x10, 0x0C, 0x24);                // movsd xmm1, [rsp]
 
                     XMM0_RSP(8);
                     IF_XMM0(BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08)); // movsd xmm0, [rsp + 8]
-                    BYTE5(0xF2, 0x0F, 0xC2, 0xC1, 0x05);       // cmpsd xmm0, xmm1, 5 (xmm0 > xmm1) 
-                    BYTE4(0x48, 0x83, 0xC4, 0x08);             // add rsp, 8
-                    BYTE3(0x49, 0xC7, 0xC5);                   // mov r13, 1
+                    BYTE5(0xF2, 0x0F, 0xC2, 0xC1, 0x00);                // cmpsd xmm0, xmm1, 0 (xmm0 == xmm1) 
+                    BYTE4(0x48, 0x83, 0xC4, 0x08);                      // add rsp, 8
+                    BYTE3(0x49, 0xC7, 0xC5);                            // mov r13, 1
                     ADDRESS(0x1);
-                    BYTE5(0xF2, 0x49, 0x0F, 0x2A, 0xCD);       // cvtsi2sd xmm1, r13
-                    BYTE4(0x66, 0x0F, 0x54, 0xC1);             // andpd xmm0, xmm1
+                    BYTE5(0xF2, 0x49, 0x0F, 0x2A, 0xCD);                // cvtsi2sd xmm1, r13
+                    BYTE4(0x66, 0x0F, 0x54, 0xC1);                      // andpd xmm0, xmm1
 
                     SAVE_XMM0();
-                    BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);       // movsd [rsp], xmm0
+                    BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);                // movsd [rsp], xmm0
 
                     break;
                 }
-                case 50: // BABE
+
+                case KEY_BAAE:
                 {
-                    BYTE5(0xF2, 0x0F, 0x10, 0x0C, 0x24);       // movsd xmm1, [rsp]
+                    BYTE5(0xF2, 0x0F, 0x10, 0x0C, 0x24);                // movsd xmm1, [rsp]
 
                     XMM0_RSP(8);
                     IF_XMM0(BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08)); // movsd xmm0, [rsp + 8]
-                    BYTE5(0xF2, 0x0F, 0xC2, 0xC1, 0x02);       // cmpsd xmm0, xmm1, 2 (xmm0 <= xmm1) 
-                    BYTE4(0x48, 0x83, 0xC4, 0x08);             // add rsp, 8
-                    BYTE3(0x49, 0xC7, 0xC5);                   // mov r13, 1
+                    BYTE5(0xF2, 0x0F, 0xC2, 0xC1, 0x05);                // cmpsd xmm0, xmm1, 5 (xmm0 > xmm1) 
+                    BYTE4(0x48, 0x83, 0xC4, 0x08);                      // add rsp, 8
+                    BYTE3(0x49, 0xC7, 0xC5);                            // mov r13, 1
                     ADDRESS(0x1);
-                    BYTE5(0xF2, 0x49, 0x0F, 0x2A, 0xCD);       // cvtsi2sd xmm1, r13
-                    BYTE4(0x66, 0x0F, 0x54, 0xC1);             // andpd xmm0, xmm1
+                    BYTE5(0xF2, 0x49, 0x0F, 0x2A, 0xCD);                // cvtsi2sd xmm1, r13
+                    BYTE4(0x66, 0x0F, 0x54, 0xC1);                      // andpd xmm0, xmm1
 
                     SAVE_XMM0();
-                    BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);       // movsd [rsp], xmm0
+                    BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);                // movsd [rsp], xmm0
 
                     break;
                 }
-                case 51: // BANE
+
+                case KEY_BABE:
                 {
-                    BYTE5(0xF2, 0x0F, 0x10, 0x0C, 0x24);       // movsd xmm1, [rsp]
+                    BYTE5(0xF2, 0x0F, 0x10, 0x0C, 0x24);                // movsd xmm1, [rsp]
 
                     XMM0_RSP(8);
                     IF_XMM0(BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08)); // movsd xmm0, [rsp + 8]
-                    BYTE5(0xF2, 0x0F, 0xC2, 0xC1, 0x4);       // cmpsd xmm0, xmm1, 4 (xmm0 != xmm1) 
-                    BYTE4(0x48, 0x83, 0xC4, 0x08);             // add rsp, 8
-                    BYTE3(0x49, 0xC7, 0xC5);                   // mov r13, 1
+                    BYTE5(0xF2, 0x0F, 0xC2, 0xC1, 0x02);                // cmpsd xmm0, xmm1, 2 (xmm0 <= xmm1) 
+                    BYTE4(0x48, 0x83, 0xC4, 0x08);                      // add rsp, 8
+                    BYTE3(0x49, 0xC7, 0xC5);                            // mov r13, 1
                     ADDRESS(0x1);
-                    BYTE5(0xF2, 0x49, 0x0F, 0x2A, 0xCD);      // cvtsi2sd xmm1, r13
-                    BYTE4(0x66, 0x0F, 0x54, 0xC1);             // andpd xmm0, xmm1
+                    BYTE5(0xF2, 0x49, 0x0F, 0x2A, 0xCD);                // cvtsi2sd xmm1, r13
+                    BYTE4(0x66, 0x0F, 0x54, 0xC1);                      // andpd xmm0, xmm1
 
                     SAVE_XMM0();
-                    BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);       // movsd [rsp], xmm0
+                    BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);                // movsd [rsp], xmm0
+
+                    break;
+                }
+
+                case KEY_BANE:
+                {
+                    BYTE5(0xF2, 0x0F, 0x10, 0x0C, 0x24);                // movsd xmm1, [rsp]
+
+                    XMM0_RSP(8);
+                    IF_XMM0(BYTE6(0xF2, 0x0F, 0x10, 0x44, 0x24, 0x08)); // movsd xmm0, [rsp + 8]
+                    BYTE5(0xF2, 0x0F, 0xC2, 0xC1, 0x4);                 // cmpsd xmm0, xmm1, 4 (xmm0 != xmm1) 
+                    BYTE4(0x48, 0x83, 0xC4, 0x08);                      // add rsp, 8
+                    BYTE3(0x49, 0xC7, 0xC5);                            // mov r13, 1
+                    ADDRESS(0x1);
+                    BYTE5(0xF2, 0x49, 0x0F, 0x2A, 0xCD);                // cvtsi2sd xmm1, r13
+                    BYTE4(0x66, 0x0F, 0x54, 0xC1);                      // andpd xmm0, xmm1
+
+                    SAVE_XMM0();
+                    BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);                // movsd [rsp], xmm0
 
                     break;
                 }
@@ -1096,20 +1105,20 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
 
             switch ((int)current_node->value)
             {
-                case 65: /* LN     */ break;
-                case 66: /* SIN    */ break;
-                case 67: /* COS    */ break;
-                case 68: /* TG     */ break;
-                case 69: /* CTG    */ break;
-                case 70: /* ARCSIN */ break;
-                case 71: /* ARCCOS */ break;
-                case 72: /* ARCTG  */ break;
-                case 73: /* ARCCTG */ break;
-                case 74: /* SH     */ break;
-                case 75: /* CH     */ break;
-                case 76: /* TH     */ break;
-                case 77: /* CTH    */ break;
-                case 78: /* SQRT   */ 
+                case KEY_LN:     break;
+                case KEY_SIN:    break;
+                case KEY_COS:    break;
+                case KEY_TG:     break;
+                case KEY_CTG:    break;
+                case KEY_ARCSIN: break;
+                case KEY_ARCCOS: break;
+                case KEY_ARCTG:  break;
+                case KEY_ARCCTG: break;
+                case KEY_SH:     break;
+                case KEY_CH:     break;
+                case KEY_TH:     break;
+                case KEY_CTH:    break;
+                case KEY_SQRT:
                 {
                     BYTE5(0xF2, 0x0F, 0x10, 0x0C, 0x24);  // movsd xmm1, [rsp]
                     BYTE4(0xF2, 0x0F, 0x51, 0xC1);        // sqrtsd xmm0, xmm1
@@ -1118,7 +1127,8 @@ void Print_equation(struct Tree* tree, struct Node* current_node, struct Code* i
                     BYTE5(0xF2, 0x0F, 0x11, 0x04, 0x24);  // movsd [rsp], xmm0
                     break;
                 }
-                case 79: /* EXP    */ break;
+
+                case KEY_EXP:    break;
                 
                 default:
                     Print_call(tree, current_node, info, count_var, bytecode, reg);
@@ -1147,7 +1157,7 @@ int Find_main(struct Tree* tree)
     {
         if (current_node->left != nullptr)
         {
-            if (current_node->left->type == FUNC && current_node->left->value == 1) return 1;
+            if (current_node->left->type == FUNC && current_node->left->value == KEY_MAIN) return 1;
             else current_node = current_node->right;
         }
         else current_node = current_node->right;
@@ -1155,7 +1165,7 @@ int Find_main(struct Tree* tree)
 
     if (current_node == nullptr) return 0;
 
-    if (current_node->type == FUNC && current_node->value == 1) return 1;
+    if (current_node->type == FUNC && current_node->value == KEY_MAIN) return 1;
     else return 0;
 }
 

@@ -13,7 +13,7 @@ The CPU was compiled with optimization -O3
 
 ## Test CPU
 
-The CPU test was run for 10 million times of calculating the quadratic equation, the average time was 18 min 3 sec, and the number of callgrind instructions was 7,760,875,990,887. And this is despite the fact that all verifiers were disabled for the test
+The CPU test was run for 10 million times of calculating the quadratic equation, the average time was 42,195 sec, and the number of callgrind instructions was 195,040,740,609. And this is despite the fact that all verifiers were disabled for the test
 
 ## Test JCC without optimizations
 
@@ -33,7 +33,7 @@ For 1 billion iterations, the results were as follows: the average time is 43,04
 
 # Conclusion
 
-As you can see, the program was sped up by orders of magnitude. If we start from some constant (and not a real value), then according to the callgrind instruction, the program accelerated by about 3600 times. 
+As you can see, the program was sped up by orders of magnitude. If we start from some constant (and not a real value), then according to the callgrind instruction, the program accelerated by about 88,9 times. 
 
 Even for such a fairly highly optimized program, where there are no unnecessary operations, we could still get an acceleration of 3%, if we evaluate the callgrind instructions, and if we still start from the execution time, the program sped up more than 16%.
 
