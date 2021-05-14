@@ -13,7 +13,7 @@ The CPU was compiled with optimization -O3
 
 ## Test CPU
 
-The CPU test was run for 10 million times of calculating the quadratic equation, the average time was 19 min 45 sec, and the number of callgrind instructions was 7,760,875,990,887. And this is despite the fact that all verifiers were disabled for the test
+The CPU test was run for 10 million times of calculating the quadratic equation, the average time was 18 min 3 sec, and the number of callgrind instructions was 7,760,875,990,887. And this is despite the fact that all verifiers were disabled for the test
 
 ## Test JCC without optimizations
 
